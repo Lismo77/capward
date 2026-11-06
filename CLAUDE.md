@@ -69,5 +69,7 @@ flutter run
 - Put pure logic (prompt building, stats, parsing) in `domain/` and test it.
 - After a write, `ref.invalidate(...)` the provider that lists the data.
 - Record notable decisions as a new ADR in `docs/decisions/`.
-- Conventional commits (`feat:`, `fix:`, `docs:`...). Release tags `vX.Y.Z`,
+- Conventional commits (`feat:`, `fix:`, `docs:`...). The type drives the
+  version bump (release-please, ADR 0006), so pick it carefully and never
+  edit `version:` in pubspec.yaml by hand. Release tags `vX.Y.Z`,
   which F-Droid builds from.
