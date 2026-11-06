@@ -64,6 +64,17 @@ flutter test
 flutter run
 ```
 
+## Git workflow
+
+- `main` is protected. Work on a short-lived branch (`feat/...`, `fix/...`,
+  `docs/...`) and open a pull request. CI (`.github/workflows/ci.yml`) must
+  pass: format check, analyze, tests.
+- PRs are squash-merged, so **the PR title is the commit message** and must
+  be a conventional commit: it decides the version bump.
+- Releases: merge the open release-please PR. That tags `vX.Y.Z`, creates the
+  GitHub release and deploys the web version. Pushes to `main` alone don't
+  reach testers.
+
 ## Conventions
 
 - Put pure logic (prompt building, stats, parsing) in `domain/` and test it.
