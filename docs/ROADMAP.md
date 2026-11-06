@@ -57,9 +57,11 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [ ] Optional sync through a folder the user controls (Syncthing, Nextcloud, WebDAV)
 
 ## Maintenance
-- [ ] Upgrade `flutter_secure_storage` to 10+ (breaking changes; check the
-  stored AI key survives). That frees `win32` 6, which lets `file_picker`
-  move to 13.x and removes the Kotlin workaround in `android/build.gradle.kts`.
+- [x] `flutter_secure_storage` 10, `file_picker` 13, `package_info_plus` 10.
+  Removed the Kotlin workaround and the "plugins apply KGP" build warning.
+- [ ] `flutter_secure_storage` 11, but only after a release with v10 is out:
+  v10 converts stored keys to the new ciphers when they're read, and v11
+  can't read the old format. Going 9 → 11 directly would lose saved API keys.
 
 ## v1.0 - Release
 - [ ] Final name and icon. Check that "Capward" isn't taken on F-Droid or Play before committing to it.

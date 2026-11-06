@@ -47,21 +47,21 @@ Future<void> exportBackup(BuildContext context) async {
   }
   close();
 
-  final String? path;
+  final Uri? saved;
   try {
-    path = await FilePicker.saveFile(
+    saved = await FilePicker.saveFile(
       dialogTitle: 'Save backup',
       fileName: backupFileName(now),
-      type: FileType.custom,
-      allowedExtensions: const ['zip'],
+      mimeType: 'application/zip',
       bytes: bytes,
     );
   } catch (e) {
     messenger.showSnackBar(SnackBar(content: Text('Could not save: $e')));
     return;
   }
-  // The web always returns null (it's a download); elsewhere null = cancel.
-  if (!kIsWeb && path == null) return;
+  // On the web it's a download that can't be cancelled from here; elsewhere
+  // null means the user cancelled the dialog.
+  if (!kIsWeb && saved == null) return;
 
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString(_kLastExport, now.toIso8601String());
@@ -76,25 +76,20 @@ Future<void> importBackup(BuildContext context) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final messenger = ScaffoldMessenger.of(context);
 
-  final FilePickerResult? picked;
+  final Uint8List bytes;
   try {
-    picked = await FilePicker.pickFiles(
+    final picked = await FilePicker.pickFile(
       dialogTitle: 'Choose a backup',
       type: FileType.custom,
       allowedExtensions: const ['zip'],
-      withData: true,
     );
+    if (picked == null) return; // cancelled
+    bytes = await picked.readAsBytes();
   } catch (e) {
-    messenger.showSnackBar(SnackBar(content: Text('Could not open file: $e')));
+    if (context.mounted) await _showError(context, "Couldn't read that file.");
     return;
   }
-  final bytes = picked?.files.singleOrNull?.bytes;
-  if (picked == null) return;
   if (!context.mounted) return;
-  if (bytes == null) {
-    await _showError(context, "Couldn't read that file.");
-    return;
-  }
 
   final Backup backup;
   try {
