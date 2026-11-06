@@ -33,6 +33,8 @@ class PaletteBar extends StatelessWidget {
         child: SizedBox(
           height: height,
           child: Row(
+            // Stretch, or the childless ColoredBoxes collapse to zero height.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (final c in colors)
                 Expanded(child: ColoredBox(color: rgbToColor(c))),
