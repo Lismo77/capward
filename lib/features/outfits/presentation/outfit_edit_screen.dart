@@ -13,9 +13,16 @@ import 'widgets/outfit_collage.dart';
 /// Manual outfit builder: pick pieces slot by slot and watch the preview and
 /// palette update.
 class OutfitEditScreen extends ConsumerStatefulWidget {
-  const OutfitEditScreen({super.key, this.outfitId});
+  const OutfitEditScreen({
+    super.key,
+    this.outfitId,
+    this.initialItemIds = const [],
+  });
 
   final int? outfitId;
+
+  /// Pre-selected pieces for a new outfit (e.g. from wardrobe multi-select).
+  final List<int> initialItemIds;
 
   @override
   ConsumerState<OutfitEditScreen> createState() => _OutfitEditScreenState();
@@ -39,7 +46,9 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
   }
 
   Future<void> _load() async {
-    if (!_isNew) {
+    if (_isNew) {
+      _selected = widget.initialItemIds.toSet();
+    } else {
       final repo = await ref.read(outfitRepositoryProvider.future);
       final outfit = await repo.byId(widget.outfitId!);
       if (outfit != null) {

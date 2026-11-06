@@ -44,7 +44,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: 'new',
-                builder: (context, state) => const OutfitEditScreen(),
+                builder: (context, state) {
+                  final extra = state.extra;
+                  return OutfitEditScreen(
+                    initialItemIds: extra is List<int> ? extra : const [],
+                  );
+                },
               ),
               GoRoute(
                 path: ':id',

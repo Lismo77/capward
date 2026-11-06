@@ -38,6 +38,27 @@ class ItemRepository {
   Future<void> delete(int id) async {
     await _db.delete('items', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<void> deleteMany(Iterable<int> ids) async {
+    final list = ids.toList();
+    if (list.isEmpty) return;
+    await _db.delete('items',
+        where: 'id IN (${_placeholders(list.length)})', whereArgs: list);
+  }
+
+  Future<void> setStatus(Iterable<int> ids, ItemStatus status) async {
+    final list = ids.toList();
+    if (list.isEmpty) return;
+    await _db.update(
+      'items',
+      {'status': status.name, 'updated_at': DateTime.now().toIso8601String()},
+      where: 'id IN (${_placeholders(list.length)})',
+      whereArgs: list,
+    );
+  }
+
+  /// "?, ?, ?" for a parameterised IN (...) clause.
+  static String _placeholders(int n) => List.filled(n, '?').join(', ');
 }
 
 final itemRepositoryProvider = FutureProvider<ItemRepository>((ref) async {
