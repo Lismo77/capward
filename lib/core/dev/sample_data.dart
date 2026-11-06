@@ -1,8 +1,10 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../features/outfits/domain/outfit.dart';
+import '../../features/wear_log/domain/wear_entry.dart';
 import '../../features/style_profile/domain/style_profile.dart';
 import '../../features/wardrobe/domain/item.dart';
+import '../format.dart';
 
 /// Marks rows created by the sample loader so they can be replaced without
 /// touching the user's own items.
@@ -10,25 +12,43 @@ const sampleNote = 'Sample item';
 
 /// Developer tools for testing. Only reachable from debug builds.
 class SampleData {
-  /// Replaces any earlier sample items and outfits with a fresh set. Fills in
-  /// the style profile only if it is empty. Returns the number of items added.
-  static Future<int> loadWardrobe(Database db) async {
+  /// Replaces any earlier sample items, outfits and wears with a fresh set.
+  /// Fills in the style profile only if it is empty. Returns the number of
+  /// items added.
+  ///
+  /// Sample items are back-dated 200 days so the "not worn in 90 days" stat
+  /// has something to show.
+  static Future<int> loadWardrobe(Database db, {DateTime? today}) async {
+    final t = today ?? DateTime.now();
+    final added = DateTime(t.year, t.month, t.day - 200);
     await db.transaction((txn) async {
+      await txn.delete('wear_log', where: 'notes = ?', whereArgs: [sampleNote]);
       await txn.delete('outfits', where: 'notes = ?', whereArgs: [sampleNote]);
       await txn.delete('items', where: 'notes = ?', whereArgs: [sampleNote]);
       final idsByName = <String, int>{};
       for (final item in sampleItems) {
-        idsByName[item.name] =
-            await txn.insert('items', item.toRow()..remove('id'));
+        idsByName[item.name] = await txn.insert('items', {
+          ...item.toRow()..remove('id'),
+          'created_at': '${isoDate(added)} 12:00:00',
+        });
       }
+      final outfitIds = <int>[];
       for (final (name, occasion, pieces) in sampleOutfits) {
         final outfitId = await txn.insert(
           'outfits',
           Outfit(name: name, occasion: occasion, notes: sampleNote).toRow(),
         );
+        outfitIds.add(outfitId);
         for (final piece in pieces) {
           await txn.insert('outfit_items',
               {'outfit_id': outfitId, 'item_id': idsByName[piece]!});
+        }
+      }
+      for (final wear in sampleWears(t, outfitIds, idsByName)) {
+        final wearId = await txn.insert('wear_log', wear.toRow());
+        for (final itemId in wear.itemIds) {
+          await txn
+              .insert('wear_log_items', {'wear_id': wearId, 'item_id': itemId});
         }
       }
       final rows = await txn.query('style_profile', where: 'id = 1');
@@ -59,6 +79,54 @@ class SampleData {
           where: 'id = 1');
     });
   }
+}
+
+/// About four months of made-up wears: the sample outfits in rotation (one
+/// being worn today, two yesterday), a few loose pieces, the dress only in
+/// late summer, and the turtleneck and chinos never.
+List<WearEntry> sampleWears(
+  DateTime today,
+  List<int> outfitIds,
+  Map<String, int> idsByName,
+) {
+  DateTime at(int daysBack, int hour, [int minute = 0]) =>
+      DateTime(today.year, today.month, today.day - daysBack, hour, minute);
+  List<int> ids(List<String> names) => [for (final n in names) idsByName[n]!];
+  final outfitPieces = [for (final (_, _, pieces) in sampleOutfits) pieces];
+  WearEntry outfit(int pick, DateTime when) => WearEntry(
+        wornOn: when,
+        wornAt: when,
+        outfitId: outfitIds[pick],
+        itemIds: ids(outfitPieces[pick]),
+        notes: sampleNote,
+      );
+  WearEntry loose(List<String> names, DateTime when) => WearEntry(
+        wornOn: when,
+        wornAt: when,
+        itemIds: ids(names),
+        notes: sampleNote,
+      );
+
+  final wears = <WearEntry>[
+    // Wearing the office outfit today.
+    outfit(1, at(0, 8, 15)),
+    // Yesterday: office, then changed for the evening.
+    outfit(1, at(1, 8, 5)),
+    outfit(2, at(1, 17, 40)),
+  ];
+  for (var d = 2; d <= 120; d++) {
+    if (d % 2 == 0) {
+      // Weekend layers twice as often as the others.
+      wears.add(outfit(const [0, 1, 0, 2][(d ~/ 2) % 4], at(d, 8, 30)));
+    } else if (d % 5 == 0) {
+      wears.add(
+          loose(['White cotton tee', 'Dark indigo straight jeans'], at(d, 9)));
+    }
+  }
+  for (final d in [100, 104, 111]) {
+    wears.add(loose(['Navy shirt dress', 'White leather sneakers'], at(d, 10)));
+  }
+  return wears;
 }
 
 /// (name, occasion, item names) - names must match [sampleItems].

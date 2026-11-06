@@ -6,6 +6,8 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../wardrobe/data/item_repository.dart';
 import '../../wardrobe/domain/item.dart';
+import '../../wear_log/data/wear_log_repository.dart';
+import '../../wear_log/domain/wear_entry.dart';
 import '../data/outfit_repository.dart';
 import '../domain/outfit.dart';
 import 'widgets/outfit_collage.dart';
@@ -18,6 +20,8 @@ class OutfitsScreen extends ConsumerWidget {
     final outfits = ref.watch(outfitsProvider);
     final items = ref.watch(itemsProvider).valueOrNull ?? const <Item>[];
     final byId = {for (final i in items) i.id!: i};
+    final wears = ref.watch(wearLogProvider).valueOrNull ?? const [];
+    final wearingId = ref.watch(currentOutfitWearProvider)?.outfitId;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Outfits')),
@@ -51,7 +55,12 @@ class OutfitsScreen extends ConsumerWidget {
               final outfit = list[i];
               final outfitItems = orderForDisplay(
                   outfit.itemIds.map((id) => byId[id]).whereType<Item>());
-              return _OutfitCard(outfit: outfit, items: outfitItems);
+              return _OutfitCard(
+                outfit: outfit,
+                items: outfitItems,
+                timesWorn: outfitWearCount(wears, outfit.id!),
+                wearing: outfit.id == wearingId,
+              );
             },
           );
         },
@@ -61,10 +70,19 @@ class OutfitsScreen extends ConsumerWidget {
 }
 
 class _OutfitCard extends StatelessWidget {
-  const _OutfitCard({required this.outfit, required this.items});
+  const _OutfitCard({
+    required this.outfit,
+    required this.items,
+    required this.timesWorn,
+    required this.wearing,
+  });
 
   final Outfit outfit;
   final List<Item> items;
+  final int timesWorn;
+
+  /// The outfit being worn today: outlined and badged.
+  final bool wearing;
 
   @override
   Widget build(BuildContext context) {
@@ -72,16 +90,55 @@ class _OutfitCard extends StatelessWidget {
     final details = [
       '${items.length} ${items.length == 1 ? 'piece' : 'pieces'}',
       if ((outfit.occasion ?? '').isNotEmpty) outfit.occasion!,
+      if (timesWorn > 0) 'worn $timesWorn×',
     ].join(' · ');
 
+    final scheme = theme.colorScheme;
     return Card(
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: wearing
+            ? BorderSide(color: scheme.primary, width: 3)
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: () => context.push('/outfits/${outfit.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: OutfitCollage(items: items)),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  OutfitCollage(items: items),
+                  if (wearing)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check,
+                                size: 14, color: scheme.onPrimary),
+                            const SizedBox(width: 4),
+                            Text('Wearing',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: scheme.onPrimary)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8),
               child: Column(

@@ -10,7 +10,7 @@ A free, open-source Android app (web later) for building and keeping a
   key** from the provider they choose (Claude, OpenAI, Gemini, Mistral,
   OpenRouter, Groq, or a self-hosted model through Ollama).
 
-> Status: early scaffold (v0.1 in progress). See [docs/ROADMAP.md](docs/ROADMAP.md).
+> Status: early development (v0.2 done). See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Features
 
@@ -18,8 +18,8 @@ A free, open-source Android app (web later) for building and keeping a
 |---|---|---|
 | Wardrobe | Add items with photo, colours, material, seasons, formality, price | *Planned:* fill in item details from a photo |
 | Style profile | Write down your palette, shapes and rules | Coach follows them |
-| Outfits & wear log | *Planned (v0.2)* | *Planned:* outfit ideas from what you own |
-| Insights | *Planned:* cost per wear, unworn items | *Planned:* gap analysis, "does this purchase fit my capsule?" |
+| Outfits & wear log | Build outfits slot by slot, see their colour palette, log what you wore each day | *Planned:* outfit ideas from what you own |
+| Insights | Most and least worn, not worn in 90 days, cost per wear | *Planned:* gap analysis, "does this purchase fit my capsule?" |
 | Coach chat | – | Ask anything, grounded in your actual wardrobe |
 
 ## Getting started (development)

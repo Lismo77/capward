@@ -30,7 +30,7 @@ to F-Droid.
 | `capsules`, `capsule_items` | Collections with a season, dates and target size. An item can be in several. |
 | `wear_log`, `wear_log_items` | What was worn on which day. Drives every stat. |
 | `style_profile` | One row: palette, style words, silhouettes, things to avoid, lifestyle. |
-| `item_wear_stats` (view) | Times worn, last worn and cost per wear for each item. |
+| `item_wear_stats` (view) | Times worn, last worn and cost per wear for each item. Counts rows, not days, so the app doesn't use it (see ADR 0005). Handy for ad-hoc SQL. |
 
 Money is stored as integer cents. Dates are ISO-8601 text.
 

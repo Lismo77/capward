@@ -64,6 +64,7 @@ class Item {
     this.photoPath,
     this.status = ItemStatus.active,
     this.notes,
+    this.createdAt,
   });
 
   final int? id;
@@ -81,6 +82,10 @@ class Item {
   final String? photoPath;
   final ItemStatus status;
   final String? notes;
+
+  /// When the item was added to the app. Read from the database only; new
+  /// rows get it from the column default.
+  final DateTime? createdAt;
 
   Map<String, Object?> toRow() => {
         'id': id,
@@ -119,6 +124,7 @@ class Item {
       photoPath: row['photo_path'] as String?,
       status: ItemStatus.values.asNameMap()[row['status']] ?? ItemStatus.active,
       notes: row['notes'] as String?,
+      createdAt: DateTime.tryParse(row['created_at'] as String? ?? ''),
     );
   }
 

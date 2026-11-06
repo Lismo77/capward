@@ -6,6 +6,9 @@ import '../../../core/widgets/palette_bar.dart';
 import '../../wardrobe/data/item_repository.dart';
 import '../../wardrobe/domain/item.dart';
 import '../../wardrobe/presentation/widgets/item_thumbnail.dart';
+import '../../wear_log/data/wear_log_repository.dart';
+import '../../wear_log/domain/wear_entry.dart';
+import '../../wear_log/presentation/log_wear.dart';
 import '../data/outfit_repository.dart';
 import '../domain/outfit.dart';
 import 'widgets/outfit_collage.dart';
@@ -32,6 +35,9 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
   final _name = TextEditingController();
   final _occasion = TextEditingController();
   Set<int> _selected = {};
+
+  /// Pieces as last saved. Wears log these, not unsaved edits.
+  List<int> _savedItemIds = const [];
   OutfitSource _source = OutfitSource.user;
   String? _notes;
   bool _loading = true;
@@ -55,6 +61,7 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
         _name.text = outfit.name;
         _occasion.text = outfit.occasion ?? '';
         _selected = outfit.itemIds.toSet();
+        _savedItemIds = outfit.itemIds;
         _source = outfit.source;
         _notes = outfit.notes;
       }
@@ -113,6 +120,7 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
     final repo = await ref.read(outfitRepositoryProvider.future);
     await repo.delete(widget.outfitId!);
     ref.invalidate(outfitsProvider);
+    ref.invalidate(wearLogProvider);
     if (mounted) context.pop();
   }
 
@@ -160,6 +168,11 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           _Preview(items: selectedItems),
+          if (!_isNew && _savedItemIds.isNotEmpty)
+            _OutfitWearRow(
+              outfitId: widget.outfitId!,
+              itemIds: _savedItemIds,
+            ),
           const SizedBox(height: 16),
           TextField(
             controller: _name,
@@ -228,6 +241,85 @@ class _Preview extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Wear count plus the "Wear this" / "Wearing" toggle.
+class _OutfitWearRow extends ConsumerWidget {
+  const _OutfitWearRow({required this.outfitId, required this.itemIds});
+
+  final int outfitId;
+  final List<int> itemIds;
+
+  Future<void> _confirmRemove(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove from today?'),
+        content: const Text('Use this if you marked it by mistake. To '
+            'change outfits, just wear another one.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Remove')),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await stopWearingOutfit(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entries = ref.watch(wearLogProvider).valueOrNull ?? const [];
+    final current = ref.watch(currentOutfitWearProvider);
+    final wearing = current?.outfitId == outfitId;
+    final count = outfitWearCount(entries, outfitId);
+
+    final String status;
+    if (wearing && current!.wornAt != null) {
+      final time = MaterialLocalizations.of(context).formatTimeOfDay(
+        TimeOfDay.fromDateTime(current.wornAt!),
+        alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+      );
+      status = 'Wearing since $time';
+    } else if (wearing) {
+      status = 'Wearing today';
+    } else {
+      status = switch (count) {
+        0 => 'Not worn yet',
+        1 => 'Worn once',
+        _ => 'Worn $count times',
+      };
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(status, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          if (wearing)
+            FilledButton.icon(
+              icon: const Icon(Icons.check, size: 18),
+              label: const Text('Wearing'),
+              onPressed: () => _confirmRemove(context),
+            )
+          else
+            FilledButton.tonalIcon(
+              icon: const Icon(Icons.checkroom_outlined, size: 18),
+              label: const Text('Wear this'),
+              onPressed: () =>
+                  wearOutfit(context, outfitId: outfitId, itemIds: itemIds),
+            ),
         ],
       ),
     );

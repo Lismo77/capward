@@ -7,6 +7,9 @@ import 'package:capsule_wardrobe/features/outfits/data/outfit_repository.dart';
 import 'package:capsule_wardrobe/features/outfits/domain/outfit.dart';
 import 'package:capsule_wardrobe/features/wardrobe/data/item_repository.dart';
 import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
+import 'package:capsule_wardrobe/features/wear_log/data/wear_log_repository.dart';
+import 'package:capsule_wardrobe/features/wear_log/domain/wear_entry.dart';
+import 'package:capsule_wardrobe/features/wear_log/domain/wear_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -15,6 +18,7 @@ void main() {
   late Database db;
   late ItemRepository items;
   late OutfitRepository outfits;
+  late WearLogRepository wears;
 
   setUpAll(() {
     sqfliteFfiInit();
@@ -25,6 +29,7 @@ void main() {
     db = await AppDatabase.open(path: inMemoryDatabasePath);
     items = ItemRepository(db);
     outfits = OutfitRepository(db);
+    wears = WearLogRepository(db);
   });
 
   tearDown(() => db.close());
@@ -80,14 +85,99 @@ void main() {
   });
 
   test('sample loader can run twice without duplicates', () async {
-    await addItem('My own coat', ItemCategory.outerwear);
-    await SampleData.loadWardrobe(db);
-    await SampleData.loadWardrobe(db);
+    final coat = await addItem('My own coat', ItemCategory.outerwear);
+    await wears.log(WearEntry(wornOn: DateTime(2026, 1, 1), itemIds: [coat]));
+    final today = DateTime(2026, 11, 6);
+    await SampleData.loadWardrobe(db, today: today);
+    await SampleData.loadWardrobe(db, today: today);
 
     expect(await items.all(), hasLength(sampleItems.length + 1));
     final loaded = await outfits.all();
     expect(loaded, hasLength(sampleOutfits.length));
     expect(loaded.every((o) => o.itemIds.isNotEmpty), isTrue);
+
+    final logged = await wears.all();
+    final ids = {for (final o in loaded) o.id};
+    expect(logged.where((w) => w.itemIds.contains(coat)), hasLength(1));
+    expect(
+        logged
+            .where((w) => w.outfitId != null)
+            .every((w) => ids.contains(w.outfitId)),
+        isTrue);
+    final samples = logged.where((w) => w.notes == sampleNote).length;
+    expect(
+        samples,
+        sampleWears(today, [
+          1,
+          2,
+          3
+        ], {
+          for (final i in sampleItems) i.name: 0,
+        }).length);
+  });
+
+  test('sample wears give every stats section something to show', () async {
+    final today = DateTime(2026, 11, 6);
+    await SampleData.loadWardrobe(db, today: today);
+    final stats = WardrobeStats.compute(
+      items: await items.all(),
+      entries: await wears.all(),
+      today: today,
+    );
+    expect(stats.mostWorn, isNotEmpty);
+    expect(stats.leastWorn, isNotEmpty);
+    expect(stats.costPerWear, isNotEmpty);
+    expect(stats.notWorn.map((s) => s.item.name),
+        containsAll(['Black turtleneck', 'Olive chinos', 'Navy shirt dress']));
+  });
+
+  test('wear log round-trips and survives outfit and item deletes', () async {
+    final tee = await addItem('Tee', ItemCategory.top);
+    final jeans = await addItem('Jeans', ItemCategory.bottom);
+    final outfitId =
+        await outfits.save(Outfit(name: 'Casual', itemIds: [tee, jeans]));
+    final id = await wears.log(WearEntry(
+        wornOn: DateTime(2026, 11, 6, 20),
+        outfitId: outfitId,
+        itemIds: [tee, jeans]));
+    await wears.log(WearEntry(wornOn: DateTime(2026, 11, 1), itemIds: [jeans]));
+
+    var all = await wears.all();
+    expect(all.map((w) => w.wornOn),
+        [DateTime(2026, 11, 6), DateTime(2026, 11, 1)]);
+    expect(all.first.itemIds.toSet(), {tee, jeans});
+
+    // Deleting the outfit keeps the wear, minus the link.
+    await outfits.delete(outfitId);
+    all = await wears.all();
+    expect(all.first.outfitId, isNull);
+    expect(all.first.itemIds.toSet(), {tee, jeans});
+
+    // Deleting every item in an entry hides it.
+    await items.delete(jeans);
+    all = await wears.all();
+    expect(all, hasLength(1));
+    expect(all.single.itemIds, [tee]);
+
+    await wears.delete(id);
+    expect(await wears.all(), isEmpty);
+  });
+
+  test('wear times round-trip and order entries within a day', () async {
+    final tee = await addItem('Tee', ItemCategory.top);
+    final morning = DateTime(2026, 11, 6, 8, 15);
+    final evening = DateTime(2026, 11, 6, 17, 40);
+    await wears.log(WearEntry.now(itemIds: [tee], now: evening));
+    await wears.log(WearEntry.now(itemIds: [tee], now: morning));
+    await wears.log(WearEntry(wornOn: DateTime(2026, 11, 6), itemIds: [tee]));
+
+    final all = await wears.all();
+    expect(all.map((w) => w.wornAt), [evening, morning, null]);
+  });
+
+  test('items read their created_at', () async {
+    final id = await addItem('Tee', ItemCategory.top);
+    expect((await items.byId(id))!.createdAt, isNotNull);
   });
 
   test('upgrading a v1 database keeps colours as swatches', () async {

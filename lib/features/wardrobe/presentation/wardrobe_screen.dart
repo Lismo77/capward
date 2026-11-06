@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../outfits/data/outfit_repository.dart';
+import '../../wear_log/data/wear_log_repository.dart';
+import '../../wear_log/presentation/log_wear.dart';
 import '../data/item_repository.dart';
 import '../domain/item.dart';
 import 'widgets/item_thumbnail.dart';
@@ -52,6 +54,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
   Future<void> _refresh() async {
     ref.invalidate(itemsProvider);
     ref.invalidate(outfitsProvider);
+    ref.invalidate(wearLogProvider);
   }
 
   Future<void> _setStatus(ItemStatus status) async {
@@ -89,6 +92,21 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
     await repo.deleteMany(_selected);
     await _refresh();
     if (mounted) _clearSelection();
+  }
+
+  void _woreToday(List<Item> all) {
+    // Wishlist items aren't owned yet, so they can't be worn.
+    final ids = [
+      for (final i in all)
+        if (_selected.contains(i.id) && i.status != ItemStatus.wishlist) i.id!,
+    ];
+    if (ids.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Wishlist items can't be logged as worn")));
+      return;
+    }
+    _clearSelection();
+    logItemsWorn(context, itemIds: ids);
   }
 
   void _makeOutfit() {
@@ -197,6 +215,11 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
           tooltip: allSelected ? 'Deselect all' : 'Select all',
           onPressed: () => setState(() =>
               _selected = allSelected ? {} : {..._selected, ...visibleIds}),
+        ),
+        IconButton(
+          icon: const Icon(Icons.event_available_outlined),
+          tooltip: 'Wore these today',
+          onPressed: () => _woreToday(all),
         ),
         IconButton(
           icon: const Icon(Icons.style_outlined),

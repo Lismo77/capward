@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../ai/ai_providers.dart';
-import '../features/capsules/presentation/capsules_screen.dart';
 import '../features/coach/presentation/coach_screen.dart';
 import '../features/outfits/presentation/outfit_edit_screen.dart';
 import '../features/outfits/presentation/outfits_screen.dart';
@@ -12,6 +11,9 @@ import '../features/settings/presentation/settings_screen.dart';
 import '../features/style_profile/presentation/style_profile_screen.dart';
 import '../features/wardrobe/presentation/item_edit_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_screen.dart';
+import '../features/wear_log/presentation/stats_screen.dart';
+import '../features/wear_log/presentation/today_bar.dart';
+import '../features/wear_log/presentation/wear_history_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -60,8 +62,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(
-            path: '/capsules',
-            builder: (context, state) => const CapsulesScreen(),
+            path: '/stats',
+            builder: (context, state) => const StatsScreen(),
+            routes: [
+              GoRoute(
+                path: 'history',
+                builder: (context, state) => const WearHistoryScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: '/coach',
@@ -87,6 +95,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
+/// Tabs (not their sub-pages) that show the today bar.
+const _todayBarTabs = {'/wardrobe', '/outfits', '/stats'};
+
 class _Tab {
   const _Tab(this.path, this.icon, this.label);
   final String path;
@@ -109,15 +120,31 @@ class HomeShell extends ConsumerWidget {
     final tabs = <_Tab>[
       const _Tab('/wardrobe', Icons.checkroom_outlined, 'Wardrobe'),
       const _Tab('/outfits', Icons.style_outlined, 'Outfits'),
-      const _Tab('/capsules', Icons.inventory_2_outlined, 'Capsules'),
+      const _Tab('/stats', Icons.insights_outlined, 'Stats'),
       if (aiEnabled) const _Tab('/coach', Icons.auto_awesome_outlined, 'Coach'),
       const _Tab('/settings', Icons.settings_outlined, 'Settings'),
     ];
     var index = tabs.indexWhere((t) => location.startsWith(t.path));
     if (index < 0) index = 0;
 
+    // The today bar sits above the tab's own app bar, so the tab mustn't add
+    // the status bar padding a second time.
+    final showToday = _todayBarTabs.contains(location);
+
     return Scaffold(
-      body: child,
+      body: Column(
+        children: [
+          if (showToday) const TodayBar(),
+          Expanded(
+            key: const ValueKey('tab-body'),
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: showToday,
+              child: child,
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) => context.go(tabs[i].path),

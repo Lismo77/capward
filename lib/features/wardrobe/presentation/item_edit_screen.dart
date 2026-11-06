@@ -5,9 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/format.dart';
 import '../../../core/photo_store.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../outfits/data/outfit_repository.dart';
+import '../../wear_log/data/wear_log_repository.dart';
+import '../../wear_log/presentation/log_wear.dart';
 import '../data/item_repository.dart';
 import '../domain/item.dart';
 import 'color_detection.dart';
@@ -181,6 +184,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
     await repo.delete(widget.itemId!);
     ref.invalidate(itemsProvider);
     ref.invalidate(outfitsProvider);
+    ref.invalidate(wearLogProvider);
     if (mounted) context.pop();
   }
 
@@ -223,6 +227,10 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
               onGallery: () => _pickPhoto(ImageSource.gallery),
             ),
             gap,
+            if (!_isNew && _status != ItemStatus.wishlist) ...[
+              _WearSummary(itemId: widget.itemId!),
+              gap,
+            ],
             TextFormField(
               controller: _name,
               decoration: const InputDecoration(
@@ -353,6 +361,43 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Times worn, last worn and cost per wear, plus a one-tap wear log.
+class _WearSummary extends ConsumerWidget {
+  const _WearSummary({required this.itemId});
+
+  final int itemId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final stats = ref.watch(itemWearStatsProvider(itemId));
+    final String text;
+    if (stats == null) {
+      text = '';
+    } else if (stats.timesWorn == 0) {
+      text = 'Not worn yet';
+    } else {
+      final cpw = stats.costPerWearCents;
+      text = [
+        stats.timesWorn == 1 ? 'Worn once' : 'Worn ${stats.timesWorn} times',
+        'last worn ${inlineDate(stats.lastWornOn!, today: DateTime.now())}',
+        if (cpw != null) '${formatCents(cpw)} per wear',
+      ].join(' · ');
+    }
+    return Row(
+      children: [
+        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+        const SizedBox(width: 8),
+        FilledButton.tonalIcon(
+          icon: const Icon(Icons.event_available_outlined, size: 18),
+          label: const Text('Wore this today'),
+          onPressed: () => logItemsWorn(context, itemIds: [itemId]),
+        ),
+      ],
     );
   }
 }

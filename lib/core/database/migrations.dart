@@ -7,6 +7,13 @@
 const List<List<String>> migrations = [
   _v1,
   _v2,
+  _v3,
+];
+
+/// v3: the time an outfit or item was put on (local ISO date-time), so a day
+/// can hold several outfits in order. Null on rows logged before v3.
+const _v3 = <String>[
+  'ALTER TABLE wear_log ADD COLUMN worn_at TEXT',
 ];
 
 /// v2: real colour swatches. JSON list of {"name": "navy", "hex": "#1F2A44"}.

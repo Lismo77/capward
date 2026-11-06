@@ -9,6 +9,7 @@ import '../../../core/dev/sample_data.dart';
 import '../../outfits/data/outfit_repository.dart';
 import '../../style_profile/data/style_profile_repository.dart';
 import '../../wardrobe/data/item_repository.dart';
+import '../../wear_log/data/wear_log_repository.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -19,6 +20,7 @@ class SettingsScreen extends ConsumerWidget {
     ref.invalidate(itemsProvider);
     ref.invalidate(styleProfileProvider);
     ref.invalidate(outfitsProvider);
+    ref.invalidate(wearLogProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Loaded $count sample items')));
@@ -47,6 +49,7 @@ class SettingsScreen extends ConsumerWidget {
     ref.invalidate(itemsProvider);
     ref.invalidate(styleProfileProvider);
     ref.invalidate(outfitsProvider);
+    ref.invalidate(wearLogProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('All wardrobe data deleted')));
