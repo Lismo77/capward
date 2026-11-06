@@ -19,6 +19,11 @@ merging it tags the release.
 - The in-app version comes from `package_info_plus`, so nothing else needs
   editing by hand.
 
+- The web version deploys only when a release is created (called from
+  `release.yml`), so `main` can hold unreleased work.
+- Changes land through pull requests with required CI and squash merges, so
+  each PR title becomes one conventional commit.
+
 ## Consequences
 - Never edit `version:` in `pubspec.yaml` or the tags by hand.
 - Commit types matter: a feature committed as `chore:` won't trigger a release.

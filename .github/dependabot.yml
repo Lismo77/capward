@@ -1,0 +1,10 @@
+# Keeps GitHub Actions versions current. Dart packages stay manual: each new
+# one needs the F-Droid licence check (see CLAUDE.md).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci

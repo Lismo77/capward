@@ -63,7 +63,7 @@ Money is stored as integer cents. Dates are ISO-8601 text.
 ## Web build
 
 A PWA for iPhone testers, published to GitHub Pages by
-`.github/workflows/web.yml` on every push to `main`. Android stays the main
+`.github/workflows/web.yml` whenever a release is made (see ADR 0006). Android stays the main
 product; web-only code sits behind conditional imports
 (`if (dart.library.js_interop)`) so it never reaches the APK.
 

@@ -1,12 +1,19 @@
 # Builds the web version (PWA for iPhone testers) and publishes it to GitHub
 # Pages at https://lismo77.github.io/capward/.
 #
+# Runs when a release is made (called from release.yml), so testers only get
+# released versions. Run it by hand from the Actions tab to redeploy main.
+#
 # One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
 name: Web build
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to build (defaults to the triggering commit)
+        type: string
+        default: ''
   workflow_dispatch:
 
 permissions:
@@ -23,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
