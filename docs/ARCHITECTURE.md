@@ -53,13 +53,19 @@ Money is stored as integer cents. Dates are ISO-8601 text.
   line per item (`[id] name - category; colors; ...`). Items are referred to
   by id so replies can later be turned into real outfit records.
 
+## Backups
+
+Settings → Your data → Export / Import (`lib/features/backup/`). A backup is
+a zip with `manifest.json`, `data/<table>.json` (rows as JSON) and
+`photos/`. See ADR 0007. Import replaces everything in one transaction;
+photos are saved first and cleaned up if the import fails. The AI key and
+settings are never included.
+
 ## Next structural steps
 
 - **Structured output.** For "suggest an outfit", ask for JSON (item ids and
   a reason) and render outfit cards that can be saved, instead of chat text.
 - **Photo tagging.** Send one photo plus a schema and pre-fill the item form.
-- **Export/import.** A zip of the database plus photos. This is the backup
-  and the first sync story.
 ## Web build
 
 A PWA for iPhone testers, published to GitHub Pages by
@@ -80,4 +86,4 @@ product; web-only code sits behind conditional imports
   Android keystore), and the AI settings screen says so.
 - **Data lives in one browser.** Safari may clear site data for a site that
   isn't added to the Home Screen and goes unused for a while. Testers should
-  install it ("Add to Home Screen"). Export/import will be the backup.
+  install it ("Add to Home Screen") and export a backup now and then.

@@ -20,8 +20,10 @@ class _DbPhotoStore implements PhotoStore {
   final _cache = <String, Uint8List>{};
 
   @override
-  Future<String> save(XFile file) async {
-    final bytes = await file.readAsBytes();
+  Future<String> save(XFile file) async => saveBytes(await file.readAsBytes());
+
+  @override
+  Future<String> saveBytes(Uint8List bytes, {String extension = '.jpg'}) async {
     final db = await _db();
     final id = await db.insert('photos', {'bytes': bytes});
     final ref = '$_prefix$id';
@@ -30,12 +32,23 @@ class _DbPhotoStore implements PhotoStore {
   }
 
   @override
+  Future<void> delete(String ref) async {
+    _cache.remove(ref);
+    final id = _idOf(ref);
+    if (id == null) return;
+    final db = await _db();
+    await db.delete('photos', where: 'id = ?', whereArgs: [id]);
+  }
+
+  int? _idOf(String ref) => ref.startsWith(_prefix)
+      ? int.tryParse(ref.substring(_prefix.length))
+      : null;
+
+  @override
   Future<Uint8List?> read(String ref) async {
     final cached = _cache[ref];
     if (cached != null) return cached;
-    final id = ref.startsWith(_prefix)
-        ? int.tryParse(ref.substring(_prefix.length))
-        : null;
+    final id = _idOf(ref);
     if (id == null) return null;
     final db = await _db();
     final rows = await db.query('photos',
