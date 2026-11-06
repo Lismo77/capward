@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../../ai/ai_providers.dart';
 import '../../../core/app_version.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/format.dart';
 import '../../../core/dev/sample_data.dart';
+import '../../backup/presentation/backup_actions.dart';
 import '../../outfits/data/outfit_repository.dart';
 import '../../style_profile/data/style_profile_repository.dart';
 import '../../wardrobe/data/item_repository.dart';
@@ -74,6 +76,19 @@ class SettingsScreen extends ConsumerWidget {
                 const Text('Colours, shapes and words that define your look'),
             onTap: () => context.push('/settings/style'),
           ),
+          const _Header('Your data'),
+          ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: const Text('Export backup'),
+            subtitle: Text(_lastBackupText(ref)),
+            onTap: () => exportBackup(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.upload_outlined),
+            title: const Text('Import backup'),
+            subtitle: const Text('Replaces what is in the app now'),
+            onTap: () => importBackup(context),
+          ),
           const _Header('AI style coach'),
           SwitchListTile(
             secondary: const Icon(Icons.auto_awesome_outlined),
@@ -121,6 +136,14 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Everything lives on this device, so say how old the last backup is.
+String _lastBackupText(WidgetRef ref) {
+  const what = 'Items, photos, outfits and wear history, as a .zip';
+  final last = ref.watch(lastBackupProvider).valueOrNull;
+  if (last == null) return '$what. No backup yet.';
+  return '$what. Last: ${inlineDate(last, today: DateTime.now())}.';
 }
 
 class _Header extends StatelessWidget {

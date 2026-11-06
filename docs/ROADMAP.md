@@ -22,7 +22,8 @@ build a consistent "uniform". AI features are hidden when AI is off.
 
 ## Web preview (for iPhone testers)
 - [x] Web build: SQLite in the browser, photos in the database, GitHub Pages deploy
-- [ ] Turn on GitHub Pages and share the link with testers
+- [x] Turn on GitHub Pages and share the link with testers
+- [x] Export/import backup: a .zip of all data and photos (Settings → Your data)
 
 ## v0.3 - Uniforms
 - [ ] A uniform is a reusable formula: slots, each holding a few interchangeable items (e.g. top = white tee or grey tee; bottom = black jeans; shoes = white sneakers)
@@ -53,8 +54,12 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [ ] Scheduled outfit check-in: on the day, ask "Wearing this?" Yes logs it;
   "No, I wore something else" lets the user pick the outfit they wore
 - [ ] Events with dress codes. The AI assigns an existing outfit, or builds one, to fit the dress code.
-- [ ] Export/import (zip of the database plus photos)
 - [ ] Optional sync through a folder the user controls (Syncthing, Nextcloud, WebDAV)
+
+## Maintenance
+- [ ] Upgrade `flutter_secure_storage` to 10+ (breaking changes; check the
+  stored AI key survives). That frees `win32` 6, which lets `file_picker`
+  move to 13.x and removes the Kotlin workaround in `android/build.gradle.kts`.
 
 ## v1.0 - Release
 - [ ] Final name and icon. Check that "Capward" isn't taken on F-Droid or Play before committing to it.

@@ -17,6 +17,13 @@ abstract class PhotoStore {
   /// Copies a picked photo into app storage and returns its reference.
   Future<String> save(XFile file);
 
+  /// Stores raw image bytes (e.g. from a backup) and returns a reference.
+  /// [extension] is like ".jpg".
+  Future<String> saveBytes(Uint8List bytes, {String extension = '.jpg'});
+
+  /// Removes a photo. Does nothing if it's already gone.
+  Future<void> delete(String ref);
+
   /// The photo's bytes, or null if it's gone.
   Future<Uint8List?> read(String ref);
 
