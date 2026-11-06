@@ -22,6 +22,12 @@ explanations short.
 5. **Anti-consumption.** The app helps people wear what they own, not buy
    more. Suggestions use existing items first. Buying is framed as filling a
    real gap, never as browsing. No shopping links, no affiliate anything.
+6. **Android comes first.** The F-Droid Android app is the main product. The
+   web version (a PWA for iPhone testers) is secondary. If something works
+   badly on the web, the web version gets the simpler option or goes without
+   the feature, never the other way round. Keep web-only code behind
+   conditional imports so it never reaches the Android build, and don't
+   commit binary files (e.g. `sqlite3.wasm`). Fetch them at web build time.
 
 ## Stack
 
