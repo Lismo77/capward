@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../ai/ai_providers.dart';
+import '../../../core/app_version.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/dev/sample_data.dart';
 import '../../outfits/data/outfit_repository.dart';
@@ -108,10 +109,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
           const _Header('About'),
-          const AboutListTile(
-            icon: Icon(Icons.info_outline),
+          AboutListTile(
+            icon: const Icon(Icons.info_outline),
             applicationName: 'Capward',
-            applicationVersion: '0.1.0',
+            applicationVersion: ref.watch(appVersionProvider).valueOrNull,
             applicationLegalese:
                 'Free software under the GNU General Public License v3. '
                 'No ads, no tracking.',
