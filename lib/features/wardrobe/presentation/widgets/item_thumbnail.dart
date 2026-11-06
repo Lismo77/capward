@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
+import '../../../../core/photos/photo_store.dart';
 import '../../../../core/widgets/palette_bar.dart';
 import '../../domain/item.dart';
 
@@ -18,11 +17,7 @@ class ItemThumbnail extends StatelessWidget {
     final placeholder = _ColourTile(item: item, iconSize: iconSize);
     final path = item.photoPath;
     if (path == null) return placeholder;
-    return Image.file(
-      File(path),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => placeholder,
-    );
+    return StoredPhoto(path, fallback: (_) => placeholder);
   }
 }
 

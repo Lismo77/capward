@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 import 'ai_client.dart';
@@ -39,6 +40,9 @@ class AnthropicClient implements AiClient {
         'x-api-key': apiKey,
         'anthropic-version': apiVersion,
         if (_usesFallbacks) 'anthropic-beta': _fallbackBeta,
+        // Anthropic rejects browser (CORS) requests without this opt-in. The
+        // user's own key is already on their own device, so it's fine here.
+        if (kIsWeb) 'anthropic-dangerous-direct-browser-access': 'true',
       };
 
   Map<String, Object?> buildBody({

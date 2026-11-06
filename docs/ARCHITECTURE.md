@@ -60,6 +60,24 @@ Money is stored as integer cents. Dates are ISO-8601 text.
 - **Photo tagging.** Send one photo plus a schema and pre-fill the item form.
 - **Export/import.** A zip of the database plus photos. This is the backup
   and the first sync story.
-- **Web.** `sqflite` and `dart:io` don't run on the web. Swap the database
-  for `sqflite_common_ffi_web` and abstract photo storage. Browsers also block
-  some providers' APIs (CORS), and the web has no secure key storage.
+## Web build
+
+A PWA for iPhone testers, published to GitHub Pages by
+`.github/workflows/web.yml` on every push to `main`. Android stays the main
+product; web-only code sits behind conditional imports
+(`if (dart.library.js_interop)`) so it never reaches the APK.
+
+- **Database:** `lib/core/database/platform/` picks the factory. The web uses
+  `sqflite_common_ffi_web`: SQLite compiled to WebAssembly, saved in
+  IndexedDB. Same schema and migrations as Android.
+- **Photos:** `lib/core/photos/PhotoStore`. Android saves files and stores the
+  path. The web stores bytes in the `photos` table (migration v4) and stores
+  `photo:<id>`.
+- **Binaries:** `web/sqlite3.wasm` and `web/sqflite_sw.js` aren't committed.
+  `tool/build_web.sh` fetches the wasm matching `sqlite3` in `pubspec.lock`.
+- **AI:** Anthropic needs the `anthropic-dangerous-direct-browser-access`
+  header from a browser. The key sits in browser storage (weaker than the
+  Android keystore), and the AI settings screen says so.
+- **Data lives in one browser.** Safari may clear site data for a site that
+  isn't added to the Home Screen and goes unused for a while. Testers should
+  install it ("Add to Home Screen"). Export/import will be the backup.

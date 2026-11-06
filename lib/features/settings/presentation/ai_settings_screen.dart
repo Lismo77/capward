@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -119,6 +120,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (kIsWeb) const _WebNote(),
           DropdownButtonFormField<String>(
             initialValue: _presetId,
             decoration: const InputDecoration(labelText: 'Provider'),
@@ -196,6 +198,30 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Browser limits worth knowing before entering a key.
+class _WebNote extends StatelessWidget {
+  const _WebNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.surfaceContainerHigh,
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: Text(
+          'Web version: your key is stored in this browser, which is less '
+          'protected than the Android app. Use a key with a spending limit. '
+          'Some providers block requests from browsers, and a self-hosted '
+          'server needs HTTPS and must allow this site (for Ollama, set '
+          'OLLAMA_ORIGINS).',
+        ),
       ),
     );
   }

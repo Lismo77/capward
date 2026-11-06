@@ -8,6 +8,19 @@ const List<List<String>> migrations = [
   _v1,
   _v2,
   _v3,
+  _v4,
+];
+
+/// v4: photo bytes for platforms without a file system (the web build).
+/// Android keeps photos as files and leaves this table empty.
+const _v4 = <String>[
+  '''
+  CREATE TABLE photos (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    bytes      BLOB NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+  ''',
 ];
 
 /// v3: the time an outfit or item was put on (local ISO date-time), so a day

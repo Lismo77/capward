@@ -1,12 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/format.dart';
-import '../../../core/photo_store.dart';
+import '../../../core/photos/photo_store.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../outfits/data/outfit_repository.dart';
 import '../../wear_log/data/wear_log_repository.dart';
@@ -93,7 +91,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
       imageQuality: 85,
     );
     if (picked == null) return;
-    final path = await PhotoStore.save(picked);
+    final path = await ref.read(photoStoreProvider).save(picked);
     if (!mounted) return;
     setState(() => _photoPath = path);
     // Fill in colours automatically the first time; after that the user
@@ -107,7 +105,8 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
     setState(() => _detecting = true);
     List<ItemColor> found;
     try {
-      found = await detectItemColors(path);
+      final bytes = await ref.read(photoStoreProvider).read(path);
+      found = bytes == null ? const [] : await detectItemColors(bytes);
     } catch (_) {
       found = const [];
     }
@@ -429,7 +428,14 @@ class _PhotoPicker extends StatelessWidget {
                     child: Icon(Icons.add_a_photo_outlined,
                         size: 48, color: scheme.outline),
                   )
-                : Image.file(File(path!), fit: BoxFit.cover),
+                : StoredPhoto(
+                    path!,
+                    fallback: (_) => ColoredBox(
+                      color: scheme.surfaceContainerHighest,
+                      child: Icon(Icons.broken_image_outlined,
+                          size: 48, color: scheme.outline),
+                    ),
+                  ),
           ),
         ),
         Row(

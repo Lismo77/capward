@@ -20,6 +20,10 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [x] Wear log: mark an outfit as "wearing" (switching outfits keeps both, with times) or log single items. History grouped by day.
 - [x] Stats: cost per wear, most and least worn, not worn in 90 days
 
+## Web preview (for iPhone testers)
+- [x] Web build: SQLite in the browser, photos in the database, GitHub Pages deploy
+- [ ] Turn on GitHub Pages and share the link with testers
+
 ## v0.3 - Uniforms
 - [ ] A uniform is a reusable formula: slots, each holding a few interchangeable items (e.g. top = white tee or grey tee; bottom = black jeans; shoes = white sneakers)
 - [ ] Shuffle within a uniform for small daily variations (simple random pick, no AI)
@@ -56,4 +60,3 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [ ] Final name and icon. Check that "Capward" isn't taken on F-Droid or Play before committing to it.
 - [ ] F-Droid metadata (`fastlane/metadata/android/...`), screenshots, reproducible build
 - [ ] Submit to F-Droid. Expect the "NonFreeNet" anti-feature label because the app can talk to proprietary AI services.
-- [ ] Web build (see ARCHITECTURE.md, "Next structural steps")
