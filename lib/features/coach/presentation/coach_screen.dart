@@ -60,8 +60,8 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
         messages: List.of(_messages),
       );
       if (!mounted) return;
-      setState(() =>
-          _messages.add(AiMessage(role: AiRole.assistant, text: reply)));
+      setState(
+          () => _messages.add(AiMessage(role: AiRole.assistant, text: reply)));
     } catch (e) {
       if (!mounted) return;
       // Drop the unanswered message so the conversation stays
@@ -201,12 +201,11 @@ class _Bubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(12),
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * 0.85),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.85),
         decoration: BoxDecoration(
-          color: isUser
-              ? scheme.primaryContainer
-              : scheme.surfaceContainerHighest,
+          color:
+              isUser ? scheme.primaryContainer : scheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
         child: SelectableText(message.text),

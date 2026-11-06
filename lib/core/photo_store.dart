@@ -11,7 +11,8 @@ class PhotoStore {
     final docs = await getApplicationDocumentsDirectory();
     final photos = Directory(p.join(docs.path, 'photos'));
     await photos.create(recursive: true);
-    final ext = p.extension(file.path).isEmpty ? '.jpg' : p.extension(file.path);
+    final ext =
+        p.extension(file.path).isEmpty ? '.jpg' : p.extension(file.path);
     final dest = p.join(
       photos.path,
       '${DateTime.now().millisecondsSinceEpoch}$ext',

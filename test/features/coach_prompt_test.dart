@@ -4,11 +4,11 @@ import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const sweater = Item(
+  final sweater = Item(
     id: 1,
     name: 'Navy merino crew-neck',
     category: ItemCategory.top,
-    colors: ['navy'],
+    colors: [ItemColor.named('navy')],
     material: 'merino wool',
     seasons: {Season.winter, Season.autumn},
     formality: 3,
@@ -34,11 +34,10 @@ void main() {
     );
   });
 
-  test('prompt lists active items, keeps wishlist separate, skips retired',
-      () {
+  test('prompt lists active items, keeps wishlist separate, skips retired', () {
     final prompt = buildCoachSystemPrompt(
       profile: const StyleProfile(palette: 'navy, cream, camel'),
-      items: const [sweater, oldJeans, coat],
+      items: [sweater, oldJeans, coat],
     );
 
     expect(prompt, contains('Palette: navy, cream, camel'));

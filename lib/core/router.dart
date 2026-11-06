@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../ai/ai_providers.dart';
 import '../features/capsules/presentation/capsules_screen.dart';
 import '../features/coach/presentation/coach_screen.dart';
+import '../features/outfits/presentation/outfit_edit_screen.dart';
 import '../features/outfits/presentation/outfits_screen.dart';
 import '../features/settings/presentation/ai_settings_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -40,6 +41,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/outfits',
             builder: (context, state) => const OutfitsScreen(),
+            routes: [
+              GoRoute(
+                path: 'new',
+                builder: (context, state) => const OutfitEditScreen(),
+              ),
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => OutfitEditScreen(
+                  outfitId: int.parse(state.pathParameters['id']!),
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: '/capsules',
@@ -86,7 +99,8 @@ class HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aiEnabled = ref.watch(aiSettingsProvider).valueOrNull?.enabled ?? false;
+    final aiEnabled =
+        ref.watch(aiSettingsProvider).valueOrNull?.enabled ?? false;
     final tabs = <_Tab>[
       const _Tab('/wardrobe', Icons.checkroom_outlined, 'Wardrobe'),
       const _Tab('/outfits', Icons.style_outlined, 'Outfits'),

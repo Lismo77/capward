@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
+import '../../features/outfits/domain/outfit.dart';
 import '../../features/style_profile/domain/style_profile.dart';
 import '../../features/wardrobe/domain/item.dart';
 
@@ -9,13 +10,26 @@ const sampleNote = 'Sample item';
 
 /// Developer tools for testing. Only reachable from debug builds.
 class SampleData {
-  /// Replaces any earlier sample items with a fresh set. Fills in the style
-  /// profile only if it is empty. Returns the number of items added.
+  /// Replaces any earlier sample items and outfits with a fresh set. Fills in
+  /// the style profile only if it is empty. Returns the number of items added.
   static Future<int> loadWardrobe(Database db) async {
     await db.transaction((txn) async {
+      await txn.delete('outfits', where: 'notes = ?', whereArgs: [sampleNote]);
       await txn.delete('items', where: 'notes = ?', whereArgs: [sampleNote]);
+      final idsByName = <String, int>{};
       for (final item in sampleItems) {
-        await txn.insert('items', item.toRow()..remove('id'));
+        idsByName[item.name] =
+            await txn.insert('items', item.toRow()..remove('id'));
+      }
+      for (final (name, occasion, pieces) in sampleOutfits) {
+        final outfitId = await txn.insert(
+          'outfits',
+          Outfit(name: name, occasion: occasion, notes: sampleNote).toRow(),
+        );
+        for (final piece in pieces) {
+          await txn.insert('outfit_items',
+              {'outfit_id': outfitId, 'item_id': idsByName[piece]!});
+        }
       }
       final rows = await txn.query('style_profile', where: 'id = 1');
       if (rows.isNotEmpty && StyleProfile.fromRow(rows.first).isEmpty) {
@@ -47,6 +61,41 @@ class SampleData {
   }
 }
 
+/// (name, occasion, item names) - names must match [sampleItems].
+const sampleOutfits = <(String, String?, List<String>)>[
+  (
+    'Weekend layers',
+    'weekend',
+    [
+      'Grey marl tee',
+      'Navy chore jacket',
+      'Dark indigo straight jeans',
+      'White leather sneakers',
+    ],
+  ),
+  (
+    'Office smart',
+    'office',
+    [
+      'Light blue oxford shirt',
+      'Navy merino crew-neck',
+      'Black tailored trousers',
+      'Black leather loafers',
+      'Camel wool coat',
+    ],
+  ),
+  (
+    'Autumn skirt',
+    null,
+    [
+      'Cream cable-knit sweater',
+      'Camel midi skirt',
+      'Brown Chelsea boots',
+      'Grey wool scarf',
+    ],
+  ),
+];
+
 const sampleProfile = StyleProfile(
   styleWords: 'minimal, relaxed, a little preppy',
   palette: 'navy, cream, camel, olive, white; brown leather',
@@ -62,7 +111,7 @@ final sampleItems = <Item>[
   Item(
     name: 'White cotton tee',
     category: ItemCategory.top,
-    colors: ['white'],
+    colors: [ItemColor.named('white')],
     material: 'cotton',
     seasons: {Season.spring, Season.summer, Season.autumn},
     formality: 1,
@@ -74,7 +123,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Grey marl tee',
     category: ItemCategory.top,
-    colors: ['grey'],
+    colors: [ItemColor.named('grey')],
     material: 'cotton',
     seasons: {Season.spring, Season.summer, Season.autumn},
     formality: 1,
@@ -85,7 +134,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Navy merino crew-neck',
     category: ItemCategory.top,
-    colors: ['navy'],
+    colors: [ItemColor.named('navy')],
     material: 'merino wool',
     seasons: {Season.autumn, Season.winter},
     formality: 3,
@@ -96,7 +145,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Cream cable-knit sweater',
     category: ItemCategory.top,
-    colors: ['cream'],
+    colors: [ItemColor.named('cream')],
     material: 'wool',
     seasons: {Season.autumn, Season.winter},
     formality: 2,
@@ -107,7 +156,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Light blue oxford shirt',
     category: ItemCategory.top,
-    colors: ['light blue'],
+    colors: [ItemColor.named('light blue')],
     material: 'cotton',
     seasons: {Season.spring, Season.summer, Season.autumn, Season.winter},
     formality: 3,
@@ -118,7 +167,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Black turtleneck',
     category: ItemCategory.top,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'merino wool',
     seasons: {Season.autumn, Season.winter},
     formality: 4,
@@ -130,7 +179,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Dark indigo straight jeans',
     category: ItemCategory.bottom,
-    colors: ['indigo'],
+    colors: [ItemColor.named('indigo')],
     material: 'denim',
     seasons: {Season.spring, Season.autumn, Season.winter},
     formality: 2,
@@ -142,7 +191,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Black tailored trousers',
     category: ItemCategory.bottom,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'wool blend',
     seasons: {Season.spring, Season.autumn, Season.winter},
     formality: 4,
@@ -153,7 +202,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Olive chinos',
     category: ItemCategory.bottom,
-    colors: ['olive'],
+    colors: [ItemColor.named('olive')],
     material: 'cotton twill',
     seasons: {Season.spring, Season.summer, Season.autumn},
     formality: 3,
@@ -164,7 +213,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Camel midi skirt',
     category: ItemCategory.bottom,
-    colors: ['camel'],
+    colors: [ItemColor.named('camel')],
     material: 'wool',
     seasons: {Season.autumn, Season.winter},
     formality: 3,
@@ -176,7 +225,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Navy shirt dress',
     category: ItemCategory.dress,
-    colors: ['navy'],
+    colors: [ItemColor.named('navy')],
     material: 'cotton',
     seasons: {Season.spring, Season.summer},
     formality: 3,
@@ -188,7 +237,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Camel wool coat',
     category: ItemCategory.outerwear,
-    colors: ['camel'],
+    colors: [ItemColor.named('camel')],
     material: 'wool',
     seasons: {Season.autumn, Season.winter},
     formality: 4,
@@ -199,7 +248,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Navy chore jacket',
     category: ItemCategory.outerwear,
-    colors: ['navy'],
+    colors: [ItemColor.named('navy')],
     material: 'cotton canvas',
     seasons: {Season.spring, Season.autumn},
     formality: 2,
@@ -210,7 +259,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Black rain shell',
     category: ItemCategory.outerwear,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'nylon',
     seasons: {Season.spring, Season.autumn, Season.winter},
     formality: 1,
@@ -222,7 +271,7 @@ final sampleItems = <Item>[
   Item(
     name: 'White leather sneakers',
     category: ItemCategory.shoes,
-    colors: ['white'],
+    colors: [ItemColor.named('white')],
     material: 'leather',
     seasons: {Season.spring, Season.summer, Season.autumn},
     formality: 2,
@@ -233,7 +282,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Brown Chelsea boots',
     category: ItemCategory.shoes,
-    colors: ['brown'],
+    colors: [ItemColor.named('brown')],
     material: 'suede',
     seasons: {Season.autumn, Season.winter},
     formality: 3,
@@ -244,7 +293,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Black leather loafers',
     category: ItemCategory.shoes,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'leather',
     seasons: {Season.spring, Season.autumn, Season.winter},
     formality: 4,
@@ -256,7 +305,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Grey wool scarf',
     category: ItemCategory.accessory,
-    colors: ['grey'],
+    colors: [ItemColor.named('grey')],
     material: 'wool',
     seasons: {Season.autumn, Season.winter},
     formality: 2,
@@ -267,7 +316,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Brown leather belt',
     category: ItemCategory.accessory,
-    colors: ['brown'],
+    colors: [ItemColor.named('brown')],
     material: 'leather',
     seasons: {Season.spring, Season.summer, Season.autumn, Season.winter},
     formality: 3,
@@ -278,7 +327,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Black canvas tote',
     category: ItemCategory.bag,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'canvas',
     seasons: {Season.spring, Season.summer, Season.autumn, Season.winter},
     formality: 2,
@@ -287,10 +336,10 @@ final sampleItems = <Item>[
     notes: sampleNote,
   ),
   // Other statuses
-  const Item(
+  Item(
     name: 'Olive field jacket',
     category: ItemCategory.outerwear,
-    colors: ['olive'],
+    colors: [ItemColor.named('olive')],
     material: 'waxed cotton',
     seasons: {Season.spring, Season.autumn},
     formality: 2,
@@ -300,7 +349,7 @@ final sampleItems = <Item>[
   Item(
     name: 'Faded black skinny jeans',
     category: ItemCategory.bottom,
-    colors: ['black'],
+    colors: [ItemColor.named('black')],
     material: 'denim',
     seasons: {Season.spring, Season.autumn, Season.winter},
     formality: 1,

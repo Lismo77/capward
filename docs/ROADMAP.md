@@ -14,9 +14,9 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [x] Coach chat grounded in wardrobe and style profile
 
 ## v0.2 - Outfits and colour
-- [ ] Item colours as real swatches (hex). Pick from the photo or a colour picker, or auto-detect the main colours on-device.
-- [ ] Manual outfit builder: pick items by slot (top, bottom, shoes, layer, accessories)
-- [ ] Palette bar: a strip of each outfit's colours on its thumbnail and in the detail view. No AI needed.
+- [x] Item colours as real swatches (hex). Pick from the photo or a colour picker, or auto-detect the main colours on-device.
+- [x] Manual outfit builder: pick items by slot (top, bottom, shoes, layer, accessories)
+- [x] Palette bar: a strip of each outfit's colours on its thumbnail and in the detail view. No AI needed.
 - [ ] "Wore this today" for an outfit or single items (wear log)
 - [ ] Stats: cost per wear, most and least worn, not worn in 90 days
 

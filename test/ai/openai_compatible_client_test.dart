@@ -35,8 +35,8 @@ void main() {
           messages: const [AiMessage(role: AiRole.user, text: 'hello')]);
 
       expect(reply, 'Hi there');
-      expect(sent.url.toString(),
-          'https://openrouter.ai/api/v1/chat/completions');
+      expect(
+          sent.url.toString(), 'https://openrouter.ai/api/v1/chat/completions');
       expect(sent.headers['authorization'], 'Bearer k');
       final messages = (jsonDecode(sent.body) as Map)['messages'] as List;
       expect(messages.first, {'role': 'system', 'content': 'sys'});
@@ -53,7 +53,8 @@ void main() {
           images: [AiImage(mediaType: 'image/png', base64Data: 'QUJD')],
         ),
       ]);
-      final content = ((body['messages'] as List).last as Map)['content'] as List;
+      final content =
+          ((body['messages'] as List).last as Map)['content'] as List;
       expect(content.last['image_url']['url'], 'data:image/png;base64,QUJD');
     });
 

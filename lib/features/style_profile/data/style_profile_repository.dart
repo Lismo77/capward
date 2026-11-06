@@ -11,7 +11,9 @@ class StyleProfileRepository {
 
   Future<StyleProfile> get() async {
     final rows = await _db.query('style_profile', where: 'id = 1');
-    return rows.isEmpty ? const StyleProfile() : StyleProfile.fromRow(rows.first);
+    return rows.isEmpty
+        ? const StyleProfile()
+        : StyleProfile.fromRow(rows.first);
   }
 
   Future<void> save(StyleProfile profile) async {

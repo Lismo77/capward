@@ -6,6 +6,14 @@
 ///   statement per execute call).
 const List<List<String>> migrations = [
   _v1,
+  _v2,
+];
+
+/// v2: real colour swatches. JSON list of {"name": "navy", "hex": "#1F2A44"}.
+/// The old `colors` column stays as a comma-separated list of the names, so
+/// plain SQL queries like "how many navy items" still work.
+const _v2 = <String>[
+  "ALTER TABLE items ADD COLUMN swatches TEXT NOT NULL DEFAULT '[]'",
 ];
 
 const _v1 = <String>[

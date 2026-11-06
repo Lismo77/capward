@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/palette_bar.dart';
 import '../data/item_repository.dart';
 import '../domain/item.dart';
+import 'widgets/item_thumbnail.dart';
 
 class WardrobeScreen extends ConsumerStatefulWidget {
   const WardrobeScreen({super.key});
@@ -64,8 +64,7 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 96),
-                  gridDelegate:
-                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 200,
                     childAspectRatio: 0.75,
                     crossAxisSpacing: 8,
@@ -107,16 +106,12 @@ class _ItemCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: item.photoPath == null
-                  ? const _PhotoPlaceholder()
-                  : Image.file(
-                      File(item.photoPath!),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const _PhotoPlaceholder(),
-                    ),
-            ),
+            Expanded(child: ItemThumbnail(item: item)),
+            if (item.colors.isNotEmpty)
+              PaletteBar(
+                colors: [for (final c in item.colors) c.value],
+                height: 6,
+              ),
             Padding(
               padding: const EdgeInsets.all(8),
               child: Column(
@@ -138,19 +133,6 @@ class _ItemCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return ColoredBox(
-      color: scheme.surfaceContainerHighest,
-      child: Icon(Icons.checkroom, size: 48, color: scheme.outline),
     );
   }
 }

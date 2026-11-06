@@ -52,6 +52,7 @@ docs/               ARCHITECTURE, ROADMAP, decisions/ (ADRs)
 
 ```bash
 flutter pub get
+dart format lib test   # before committing
 flutter analyze        # must be clean before committing
 flutter test
 flutter run

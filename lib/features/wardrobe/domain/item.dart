@@ -1,3 +1,7 @@
+import 'item_color.dart';
+
+export 'item_color.dart';
+
 enum ItemCategory {
   top,
   bottom,
@@ -65,7 +69,7 @@ class Item {
   final int? id;
   final String name;
   final ItemCategory category;
-  final List<String> colors;
+  final List<ItemColor> colors;
   final String? material;
   final Set<Season> seasons;
 
@@ -82,7 +86,8 @@ class Item {
         'id': id,
         'name': name,
         'category': category.name,
-        'colors': colors.join(','),
+        'colors': colors.map((c) => c.name).join(','),
+        'swatches': ItemColor.encodeList(colors),
         'material': material,
         'seasons': _sortedSeasons.map((s) => s.name).join(','),
         'formality': formality,
@@ -99,9 +104,9 @@ class Item {
     return Item(
       id: row['id'] as int?,
       name: row['name'] as String,
-      category:
-          ItemCategory.values.asNameMap()[row['category']] ?? ItemCategory.other,
-      colors: _splitList(row['colors'] as String?),
+      category: ItemCategory.values.asNameMap()[row['category']] ??
+          ItemCategory.other,
+      colors: _readColors(row),
       material: row['material'] as String?,
       seasons: _splitList(row['seasons'] as String?)
           .map((s) => Season.values.asNameMap()[s])
@@ -121,7 +126,9 @@ class Item {
   /// requests stay cheap and private.
   String describeForAi() {
     final parts = <String>[category.label.toLowerCase()];
-    if (colors.isNotEmpty) parts.add('colors: ${colors.join(', ')}');
+    if (colors.isNotEmpty) {
+      parts.add('colors: ${colors.map((c) => c.name).join(', ')}');
+    }
     if ((material ?? '').isNotEmpty) parts.add('material: $material');
     if (seasons.isNotEmpty) {
       parts.add('seasons: ${_sortedSeasons.map((s) => s.name).join(', ')}');
@@ -132,6 +139,13 @@ class Item {
 
   List<Season> get _sortedSeasons =>
       seasons.toList()..sort((a, b) => a.index.compareTo(b.index));
+}
+
+/// Rows saved before v2 only have colour names; give those preset swatches.
+List<ItemColor> _readColors(Map<String, Object?> row) {
+  final swatches = ItemColor.decodeList(row['swatches'] as String?);
+  if (swatches.isNotEmpty) return swatches;
+  return _splitList(row['colors'] as String?).map(ItemColor.named).toList();
 }
 
 List<String> _splitList(String? value) => (value ?? '')

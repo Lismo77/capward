@@ -30,8 +30,7 @@ class EmptyState extends StatelessWidget {
                 textAlign: TextAlign.center),
             const SizedBox(height: 8),
             Text(message,
-                style: theme.textTheme.bodyMedium,
-                textAlign: TextAlign.center),
+                style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
             if (action != null) ...[
               const SizedBox(height: 24),
               action!,

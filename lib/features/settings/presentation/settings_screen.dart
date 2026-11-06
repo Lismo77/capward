@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../ai/ai_providers.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/dev/sample_data.dart';
+import '../../outfits/data/outfit_repository.dart';
 import '../../style_profile/data/style_profile_repository.dart';
 import '../../wardrobe/data/item_repository.dart';
 
@@ -17,6 +18,7 @@ class SettingsScreen extends ConsumerWidget {
     final count = await SampleData.loadWardrobe(db);
     ref.invalidate(itemsProvider);
     ref.invalidate(styleProfileProvider);
+    ref.invalidate(outfitsProvider);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Loaded $count sample items')));
@@ -44,9 +46,10 @@ class SettingsScreen extends ConsumerWidget {
     await SampleData.clearAll(db);
     ref.invalidate(itemsProvider);
     ref.invalidate(styleProfileProvider);
+    ref.invalidate(outfitsProvider);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('All wardrobe data deleted')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All wardrobe data deleted')));
   }
 
   @override
@@ -63,7 +66,8 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.palette_outlined),
             title: const Text('Style profile'),
-            subtitle: const Text('Colours, shapes and words that define your look'),
+            subtitle:
+                const Text('Colours, shapes and words that define your look'),
             onTap: () => context.push('/settings/style'),
           ),
           const _Header('AI style coach'),

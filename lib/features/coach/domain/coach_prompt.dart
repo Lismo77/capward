@@ -10,8 +10,7 @@ String buildCoachSystemPrompt({
   final owned = items.where((i) => i.status == ItemStatus.active).toList();
   final wishlist = items.where((i) => i.status == ItemStatus.wishlist).toList();
   final buf = StringBuffer()
-    ..writeln(
-        'You are a personal stylist and capsule-wardrobe coach inside a '
+    ..writeln('You are a personal stylist and capsule-wardrobe coach inside a '
         'wardrobe-tracking app. Help the user build a smaller, more '
         'versatile wardrobe with a consistent personal style.')
     ..writeln()

@@ -106,7 +106,8 @@ class _StyleProfileScreenState extends ConsumerState<StyleProfileScreen> {
                     'navy, cream, camel, olive; gold accents'),
                 _field(_silhouettes, 'Shapes and silhouettes',
                     'straight-leg trousers, boxy knits'),
-                _field(_avoid, 'Avoid', 'bright orange, skinny fits, polyester'),
+                _field(
+                    _avoid, 'Avoid', 'bright orange, skinny fits, polyester'),
                 _field(_lifestyle, 'Lifestyle',
                     'hybrid office job, weekend hikes, cold winters'),
                 _field(_notes, 'Other notes', ''),

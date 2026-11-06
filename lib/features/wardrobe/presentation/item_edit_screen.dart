@@ -6,8 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/photo_store.dart';
+import '../../../core/widgets/palette_bar.dart';
+import '../../outfits/data/outfit_repository.dart';
 import '../data/item_repository.dart';
 import '../domain/item.dart';
+import 'color_detection.dart';
+import 'widgets/color_picker_sheet.dart';
 
 /// Add or edit one item. Fully manual - AI photo tagging will plug in here
 /// later as an optional "Fill in from photo" button (see docs/ROADMAP.md).
@@ -23,13 +27,14 @@ class ItemEditScreen extends ConsumerStatefulWidget {
 class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
-  final _colors = TextEditingController();
   final _material = TextEditingController();
   final _brand = TextEditingController();
   final _price = TextEditingController();
   final _notes = TextEditingController();
 
   ItemCategory _category = ItemCategory.top;
+  List<ItemColor> _colors = [];
+  bool _detecting = false;
   Set<Season> _seasons = {};
   int _formality = 3;
   ItemStatus _status = ItemStatus.active;
@@ -52,7 +57,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
       final item = await repo.byId(widget.itemId!);
       if (item != null) {
         _name.text = item.name;
-        _colors.text = item.colors.join(', ');
+        _colors = [...item.colors];
         _material.text = item.material ?? '';
         _brand.text = item.brand ?? '';
         _notes.text = item.notes ?? '';
@@ -72,7 +77,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
 
   @override
   void dispose() {
-    for (final c in [_name, _colors, _material, _brand, _price, _notes]) {
+    for (final c in [_name, _material, _brand, _price, _notes]) {
       c.dispose();
     }
     super.dispose();
@@ -86,7 +91,32 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
     );
     if (picked == null) return;
     final path = await PhotoStore.save(picked);
-    if (mounted) setState(() => _photoPath = path);
+    if (!mounted) return;
+    setState(() => _photoPath = path);
+    // Fill in colours automatically the first time; after that the user
+    // decides (they may have fixed them by hand).
+    if (_colors.isEmpty) await _detectColors(quiet: true);
+  }
+
+  Future<void> _detectColors({bool quiet = false}) async {
+    final path = _photoPath;
+    if (path == null) return;
+    setState(() => _detecting = true);
+    List<ItemColor> found;
+    try {
+      found = await detectItemColors(path);
+    } catch (_) {
+      found = const [];
+    }
+    if (!mounted) return;
+    setState(() {
+      _detecting = false;
+      if (found.isNotEmpty) _colors = found;
+    });
+    if (found.isEmpty && !quiet) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Couldn't pick out colours. Add them by hand.")));
+    }
   }
 
   Future<void> _pickDate() async {
@@ -109,11 +139,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
       id: widget.itemId,
       name: _name.text.trim(),
       category: _category,
-      colors: _colors.text
-          .split(',')
-          .map((c) => c.trim().toLowerCase())
-          .where((c) => c.isNotEmpty)
-          .toList(),
+      colors: _colors,
       material: _nullIfEmpty(_material.text),
       seasons: _seasons,
       formality: _formality,
@@ -128,6 +154,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
     final repo = await ref.read(itemRepositoryProvider.future);
     await repo.save(item);
     ref.invalidate(itemsProvider);
+    ref.invalidate(outfitsProvider);
     if (mounted) context.pop();
   }
 
@@ -153,6 +180,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
     final repo = await ref.read(itemRepositoryProvider.future);
     await repo.delete(widget.itemId!);
     ref.invalidate(itemsProvider);
+    ref.invalidate(outfitsProvider);
     if (mounted) context.pop();
   }
 
@@ -202,8 +230,9 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
                 hintText: 'e.g. Navy merino crew-neck',
               ),
               textCapitalization: TextCapitalization.sentences,
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Give the item a name' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Give the item a name'
+                  : null,
             ),
             gap,
             DropdownButtonFormField<ItemCategory>(
@@ -216,13 +245,11 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
               onChanged: (c) => setState(() => _category = c ?? _category),
             ),
             gap,
-            TextFormField(
-              controller: _colors,
-              decoration: const InputDecoration(
-                labelText: 'Colours',
-                hintText: 'navy, cream',
-                helperText: 'Comma-separated',
-              ),
+            _ColorsEditor(
+              colors: _colors,
+              onChanged: (c) => setState(() => _colors = c),
+              onDetect: _photoPath == null ? null : _detectColors,
+              detecting: _detecting,
             ),
             gap,
             TextFormField(
@@ -373,6 +400,69 @@ class _PhotoPicker extends StatelessWidget {
               icon: const Icon(Icons.photo_library_outlined),
               label: const Text('Gallery'),
             ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ColorsEditor extends StatelessWidget {
+  const _ColorsEditor({
+    required this.colors,
+    required this.onChanged,
+    required this.onDetect,
+    required this.detecting,
+  });
+
+  final List<ItemColor> colors;
+  final ValueChanged<List<ItemColor>> onChanged;
+
+  /// Null when there is no photo to detect from.
+  final VoidCallback? onDetect;
+  final bool detecting;
+
+  Future<void> _add(BuildContext context) async {
+    final picked = await showColorPickerSheet(context);
+    if (picked != null && !colors.contains(picked)) {
+      onChanged([...colors, picked]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Colours', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final c in colors)
+              InputChip(
+                avatar: ColorDot(color: c.value),
+                label: Text(c.name),
+                onDeleted: () => onChanged([...colors]..remove(c)),
+              ),
+            ActionChip(
+              avatar: const Icon(Icons.add, size: 18),
+              label: const Text('Add colour'),
+              onPressed: () => _add(context),
+            ),
+            if (onDetect != null)
+              ActionChip(
+                avatar: detecting
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.colorize, size: 18),
+                label: const Text('Detect from photo'),
+                onPressed: detecting ? null : onDetect,
+              ),
           ],
         ),
       ],

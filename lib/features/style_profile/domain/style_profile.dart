@@ -26,8 +26,14 @@ class StyleProfile {
   final String lifestyle;
   final String notes;
 
-  bool get isEmpty => [styleWords, palette, silhouettes, avoid, lifestyle, notes]
-      .every((s) => s.trim().isEmpty);
+  bool get isEmpty => [
+        styleWords,
+        palette,
+        silhouettes,
+        avoid,
+        lifestyle,
+        notes
+      ].every((s) => s.trim().isEmpty);
 
   factory StyleProfile.fromRow(Map<String, Object?> row) => StyleProfile(
         styleWords: row['style_words'] as String? ?? '',
