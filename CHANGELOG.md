@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/Lismo77/capward/compare/v0.3.0...v0.4.0) (2026-11-07)
+
+
+### Features
+
+* uniforms - outfits with interchangeable options and a daily pick ([#11](https://github.com/Lismo77/capward/issues/11)) ([a8a6e87](https://github.com/Lismo77/capward/commit/a8a6e875d2fa3cec9479947c30b5d1474273be85))
+
+
+### Bug fixes
+
+* keep coach chat across tabs and stop pickers refocusing text fields ([#12](https://github.com/Lismo77/capward/issues/12)) ([f1d28ab](https://github.com/Lismo77/capward/commit/f1d28abff4784579e7d35b7060f2751055cc01b0))
+
 ## [0.3.0](https://github.com/Lismo77/capward/compare/v0.2.0...v0.3.0) (2026-11-07)
 
 
