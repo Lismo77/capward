@@ -26,9 +26,33 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [x] Export/import backup: a .zip of all data and photos (Settings → Your data)
 
 ## v0.3 - Uniforms
-- [ ] A uniform is a reusable formula: slots, each holding a few interchangeable items (e.g. top = white tee or grey tee; bottom = black jeans; shoes = white sneakers)
-- [ ] Shuffle within a uniform for small daily variations (simple random pick, no AI)
-- [ ] Turn any outfit into a uniform
+A uniform is an outfit where some slots hold several interchangeable options
+instead of one item (e.g. shirt = any of 4 oxfords; shoes = brown Gibsons).
+It is built on outfits, not as a separate system: one entry replaces dozens
+of near-identical saved outfits. No AI needed.
+
+- [ ] Option slots: in the outfit builder, a slot can hold several items marked
+  as "pick one". Needs a per-item flag on `outfit_items` (new migration) so
+  options are kept apart from items worn together (e.g. a shirt under a
+  cardigan). An outfit with at least one option slot shows as a uniform.
+- [ ] Season-aware: when picking, skip options not tagged for the current
+  season. A slot with no in-season options is left empty (e.g. no layer in
+  summer). Uses the existing `seasons` field on items.
+- [ ] Today's pick: choose the option worn least recently (from the wear log),
+  so wear is spread evenly. A "shuffle" button rerolls with a random pick.
+- [ ] Palette bar: shows the fixed items plus today's pick, and updates on
+  shuffle. Nice-to-have: in the detail view, a small row of swatches per
+  option slot showing all its options.
+- [ ] Wear it: logging a uniform records the exact items picked, so cost per
+  wear and other stats stay accurate.
+- [ ] Turn any saved outfit into a uniform by adding options to a slot.
+- [ ] Uniform stats: how often each uniform is worn, and options that never
+  get picked.
+
+Not in v0.3: rule-based slots ("any oxford shirt") that pick up new items
+automatically. Items have no subtype or tags field yet, so slots are filled by
+hand. Colour and fit preferences belong in the style profile and the body and
+fit profile (v0.4), not in the uniform.
 
 ## v0.4 - Body and fit profile
 - [ ] Optional: height, build, proportions, fit preferences, skin undertone and colouring
@@ -39,7 +63,7 @@ build a consistent "uniform". AI features are hidden when AI is off.
 - [ ] Outfit vibe: describe a vibe ("cosy library day", "sharp but relaxed dinner") and the AI builds it from your wardrobe
 - [ ] Both return structured JSON (item ids and a reason) and appear as outfit cards you can save
 - [ ] "Fill in from photo": the AI suggests category, colours, material and seasons
-- [ ] Gap analysis and purchase check ("does this fit my capsule, or duplicate something?")
+- [ ] Gap analysis and purchase check ("does this fit my capsule or uniform, or duplicate something?")
 
 ## v0.6 - Photos
 - [ ] Background removal, on-device. Needs an open-licensed model (e.g. U²-Net, Apache-2.0) and no Google ML Kit. Expect it to add a few MB to the app.
