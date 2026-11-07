@@ -71,6 +71,31 @@ void main() {
     expect((await outfits.byId(outfitId))!.itemIds, [tee]);
   });
 
+  test('option groups round-trip and plain outfits have none', () async {
+    final oxford = await addItem('Oxford', ItemCategory.top);
+    final flannel = await addItem('Flannel', ItemCategory.top);
+    final boots = await addItem('Boots', ItemCategory.shoes);
+    final id = await outfits.save(Outfit(
+      name: 'Uniform',
+      itemIds: [oxford, flannel, boots],
+      optionGroups: {oxford: 3, flannel: 3},
+    ));
+    final back = (await outfits.byId(id))!;
+    expect(back.itemIds, [oxford, flannel, boots]);
+    expect(back.optionGroups, {oxford: 1, flannel: 1});
+    expect((await outfits.all()).single.optionGroups, back.optionGroups);
+
+    // Deleting one option leaves a group of one, which reads as an option
+    // still but saves back as a fixed piece.
+    await items.deleteMany([flannel]);
+    final after = (await outfits.byId(id))!;
+    await outfits.save(after);
+    expect((await outfits.byId(id))!.isUniform, isFalse);
+
+    final plain = await outfits.save(Outfit(name: 'Plain', itemIds: [boots]));
+    expect((await outfits.byId(plain))!.optionGroups, isEmpty);
+  });
+
   test('saving an existing outfit replaces its pieces', () async {
     final tee = await addItem('Tee', ItemCategory.top);
     final jeans = await addItem('Jeans', ItemCategory.bottom);
@@ -93,7 +118,8 @@ void main() {
 
     expect(await items.all(), hasLength(sampleItems.length + 1));
     final loaded = await outfits.all();
-    expect(loaded, hasLength(sampleOutfits.length));
+    expect(loaded, hasLength(sampleOutfits.length + 1),
+        reason: 'the outfits plus the sample uniform');
     expect(loaded.every((o) => o.itemIds.isNotEmpty), isTrue);
 
     final logged = await wears.all();
@@ -108,12 +134,13 @@ void main() {
     expect(
         samples,
         sampleWears(today, [
-          1,
-          2,
-          3
-        ], {
-          for (final i in sampleItems) i.name: 0,
-        }).length);
+              1,
+              2,
+              3
+            ], {
+              for (final i in sampleItems) i.name: 0,
+            }).length +
+            sampleUniformWears.length);
   });
 
   test('sample wears give every stats section something to show', () async {

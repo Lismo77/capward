@@ -18,7 +18,7 @@ A free, open-source Android app (web later) for building and keeping a
 |---|---|---|
 | Wardrobe | Add items with photo, colours, material, seasons, formality, price | *Planned:* fill in item details from a photo |
 | Style profile | Write down your palette, shapes and rules | Coach follows them |
-| Outfits & wear log | Build outfits slot by slot, see their colour palette, log what you wore each day | *Planned:* outfit ideas from what you own |
+| Outfits & wear log | Build outfits slot by slot, see their colour palette, log what you wore each day. Turn an outfit into a **uniform** by giving pieces options: it picks today's in-season option you wore longest ago, or shuffles | *Planned:* outfit ideas from what you own |
 | Insights | Most and least worn, not worn in 90 days, cost per wear | *Planned:* gap analysis, "does this purchase fit my capsule?" |
 | Coach chat | – | Ask anything, grounded in your actual wardrobe |
 

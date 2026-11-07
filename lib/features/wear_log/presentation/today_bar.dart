@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/format.dart';
 import '../../outfits/data/outfit_repository.dart';
+import '../../outfits/data/uniform_providers.dart';
 import '../../outfits/domain/outfit.dart';
 import '../../outfits/presentation/widgets/outfit_collage.dart';
 import '../../wardrobe/data/item_repository.dart';
@@ -46,9 +47,10 @@ class TodayBar extends ConsumerWidget {
       );
     } else {
       final byId = {for (final i in items) i.id!: i};
+      // What was logged, which for a uniform is the day's pick.
       final pieces = orderForDisplay(
-          outfit.itemIds.map((id) => byId[id]).whereType<Item>());
-      final since = current!.wornAt == null
+          current!.itemIds.map((id) => byId[id]).whereType<Item>());
+      final since = current.wornAt == null
           ? ''
           : ' · since ${_time(context, current.wornAt!)}';
       content = Row(
@@ -182,8 +184,10 @@ class _QuickChooseList extends ConsumerWidget {
         for (final outfit in sorted)
           _OutfitOption(
             outfit: outfit,
-            pieces: orderForDisplay(
-                outfit.itemIds.map((id) => byId[id]).whereType<Item>()),
+            pieces: orderForDisplay(ref
+                .watch(todaysPiecesProvider(outfit.id!))
+                .map((id) => byId[id])
+                .whereType<Item>()),
             timesWorn: outfitWearCount(entries, outfit.id!),
             lastWorn: lastWornOn(entries, outfit.id!),
             today: today,
@@ -192,7 +196,8 @@ class _QuickChooseList extends ConsumerWidget {
               Navigator.pop(context);
               if (current?.outfitId != outfit.id) {
                 wearOutfit(outerContext,
-                    outfitId: outfit.id!, itemIds: outfit.itemIds);
+                    outfitId: outfit.id!,
+                    itemIds: ref.read(todaysPiecesProvider(outfit.id!)));
               }
             },
           ),
@@ -235,10 +240,11 @@ class _OutfitOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final subtitle = timesWorn == 0
+    final worn = timesWorn == 0
         ? 'Not worn yet'
         : '${timesWorn == 1 ? 'Worn once' : 'Worn $timesWorn times'} · '
             'last ${inlineDate(lastWorn!, today: today)}';
+    final subtitle = outfit.isUniform ? 'Uniform · $worn' : worn;
     return ListTile(
       selected: wearing,
       leading: ClipRRect(

@@ -10,6 +10,7 @@ class Outfit {
     this.notes,
     this.source = OutfitSource.user,
     this.itemIds = const [],
+    this.optionGroups = const {},
   });
 
   final int? id;
@@ -19,7 +20,32 @@ class Outfit {
 
   /// Who made it. AI-built outfits are saved the same way as manual ones.
   final OutfitSource source;
+
+  /// Every piece, including uniform options.
   final List<int> itemIds;
+
+  /// Item id to option group, for items that are one of several
+  /// interchangeable options (a uniform). Items not in here are always worn.
+  final Map<int, int> optionGroups;
+
+  /// An outfit with at least one option group is a uniform.
+  bool get isUniform => optionGroups.isNotEmpty;
+
+  /// Pieces that are always worn.
+  List<int> get fixedItemIds => [
+        for (final id in itemIds)
+          if (!optionGroups.containsKey(id)) id
+      ];
+
+  /// Option groups in order, each a list of item ids in [itemIds] order.
+  List<List<int>> get groups {
+    final byGroup = <int, List<int>>{};
+    for (final id in itemIds) {
+      final g = optionGroups[id];
+      if (g != null) byGroup.putIfAbsent(g, () => []).add(id);
+    }
+    return (byGroup.keys.toList()..sort()).map((g) => byGroup[g]!).toList();
+  }
 
   Map<String, Object?> toRow() => {
         'name': name,
@@ -28,7 +54,12 @@ class Outfit {
         'source': source.name,
       };
 
-  factory Outfit.fromRow(Map<String, Object?> row, List<int> itemIds) => Outfit(
+  factory Outfit.fromRow(
+    Map<String, Object?> row,
+    List<int> itemIds, {
+    Map<int, int> optionGroups = const {},
+  }) =>
+      Outfit(
         id: row['id'] as int?,
         name: row['name'] as String,
         occasion: row['occasion'] as String?,
@@ -36,7 +67,31 @@ class Outfit {
         source:
             OutfitSource.values.asNameMap()[row['source']] ?? OutfitSource.user,
         itemIds: itemIds,
+        optionGroups: optionGroups,
       );
+}
+
+/// Keeps only groups of two or more selected items, renumbered from 1 in
+/// first-seen order. A group of one becomes a fixed piece.
+Map<int, int> normalizeOptionGroups(
+  Iterable<int> itemIds,
+  Map<int, int> optionGroups,
+) {
+  final members = <int, List<int>>{};
+  for (final id in itemIds) {
+    final g = optionGroups[id];
+    if (g != null) members.putIfAbsent(g, () => []).add(id);
+  }
+  final result = <int, int>{};
+  var next = 1;
+  for (final ids in members.values) {
+    if (ids.length < 2) continue;
+    for (final id in ids) {
+      result[id] = next;
+    }
+    next++;
+  }
+  return result;
 }
 
 /// Where an item sits in an outfit, top to bottom. Display order and the
