@@ -40,6 +40,9 @@ of near-identical saved outfits. No AI needed.
   summer). Uses the existing `seasons` field on items.
 - [ ] Today's pick: choose the option worn least recently (from the wear log),
   so wear is spread evenly. A "shuffle" button rerolls with a random pick.
+- [ ] Palette bar: shows the fixed items plus today's pick, and updates on
+  shuffle. Nice-to-have: in the detail view, a small row of swatches per
+  option slot showing all its options.
 - [ ] Wear it: logging a uniform records the exact items picked, so cost per
   wear and other stats stay accurate.
 - [ ] Turn any saved outfit into a uniform by adding options to a slot.

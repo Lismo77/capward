@@ -39,8 +39,12 @@ because items have no subtype or tags field.
 - One fewer screen and concept. Any outfit becomes a uniform by adding an
   option to a slot.
 - Wear stats stay accurate because the log stores the items actually worn.
-- Code that reads `outfit_items` must respect the flag: for example, palette
-  bars and AI prompts shouldn't treat options as items worn together.
+- Code that reads `outfit_items` must respect the flag: for example, AI
+  prompts shouldn't treat options as items worn together.
+- A uniform's palette bar shows the fixed items plus today's pick, so it
+  matches what would be worn today, the same as an outfit's. It updates on
+  shuffle and changes with the season. Today's pick is worked out from the
+  wear log and item seasons, so only a shuffle result needs keeping.
 - Old backups still import: the new column takes its default (not an
   option), so existing outfits are unchanged.
 - Colour and fit preferences live in the style profile and the body and fit
