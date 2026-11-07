@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/Lismo77/capward/compare/v0.2.0...v0.3.0) (2026-11-07)
+
+
+### Features
+
+* export and import a backup of all wardrobe data ([#6](https://github.com/Lismo77/capward/issues/6)) ([993dc2a](https://github.com/Lismo77/capward/commit/993dc2a5bc8ff37dd931409f34c375f8f6e5a2fa))
+
 ## [0.2.0](https://github.com/Lismo77/capward/compare/v0.1.0...v0.2.0) (2026-11-06)
 
 
