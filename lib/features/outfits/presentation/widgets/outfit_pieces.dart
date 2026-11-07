@@ -180,6 +180,9 @@ Future<Set<int>?> showOptionsSheet(
   required List<Item> candidates,
   required Set<int> initial,
 }) {
+  // Otherwise the last text field (e.g. Name) gets focus back when the sheet
+  // closes and the keyboard pops up.
+  FocusManager.instance.primaryFocus?.unfocus();
   return showModalBottomSheet<Set<int>>(
     context: context,
     isScrollControlled: true,
