@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/palette_bar.dart';
 import '../../domain/item.dart';
 
-Future<ItemColor?> showColorPickerSheet(BuildContext context) =>
-    showModalBottomSheet<ItemColor>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => const _ColorPickerSheet(),
-    );
+Future<ItemColor?> showColorPickerSheet(BuildContext context) {
+  // Otherwise the last text field (e.g. price) gets focus back when the
+  // sheet closes, and the form jumps to it with the keyboard up.
+  FocusManager.instance.primaryFocus?.unfocus();
+  return showModalBottomSheet<ItemColor>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (context) => const _ColorPickerSheet(),
+  );
+}
 
 class _ColorPickerSheet extends StatelessWidget {
   const _ColorPickerSheet();

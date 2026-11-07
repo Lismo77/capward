@@ -5,9 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../ai/ai_client.dart';
 import '../../../ai/ai_providers.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../style_profile/data/style_profile_repository.dart';
-import '../../wardrobe/data/item_repository.dart';
-import '../domain/coach_prompt.dart';
+import '../data/coach_chat.dart';
 
 const _starterPrompts = [
   'Suggest an outfit for a casual Friday at the office',
@@ -24,9 +22,7 @@ class CoachScreen extends ConsumerStatefulWidget {
 }
 
 class _CoachScreenState extends ConsumerState<CoachScreen> {
-  final _messages = <AiMessage>[];
   final _input = TextEditingController();
-  bool _sending = false;
 
   @override
   void dispose() {
@@ -36,7 +32,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
 
   Future<void> _send() async {
     final text = _input.text.trim();
-    if (text.isEmpty || _sending) return;
+    if (text.isEmpty || ref.read(coachChatProvider).sending) return;
 
     final client = await ref.read(aiClientProvider.future);
     if (!mounted) return;
@@ -46,38 +42,24 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       return;
     }
 
-    setState(() {
-      _messages.add(AiMessage(role: AiRole.user, text: text));
-      _input.clear();
-      _sending = true;
-    });
-
+    _input.clear();
     try {
-      final items = await ref.read(itemsProvider.future);
-      final profile = await ref.read(styleProfileProvider.future);
-      final reply = await client.complete(
-        system: buildCoachSystemPrompt(profile: profile, items: items),
-        messages: List.of(_messages),
-      );
-      if (!mounted) return;
-      setState(
-          () => _messages.add(AiMessage(role: AiRole.assistant, text: reply)));
+      await ref.read(coachChatProvider.notifier).send(client, text);
     } catch (e) {
       if (!mounted) return;
-      // Drop the unanswered message so the conversation stays
-      // user/assistant/user..., and give the text back for a retry.
-      setState(() => _messages.removeLast());
+      // Give the text back for a retry.
       _input.text = text;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(aiSettingsProvider).valueOrNull;
+    final chat = ref.watch(coachChatProvider);
+    final messages = chat.messages;
+    final sending = chat.sending;
 
     if (settings == null || !settings.enabled || !settings.isConfigured) {
       return Scaffold(
@@ -100,26 +82,28 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
       appBar: AppBar(
         title: const Text('Style coach'),
         actions: [
-          if (_messages.isNotEmpty)
+          if (messages.isNotEmpty)
             IconButton(
               tooltip: 'New conversation',
               icon: const Icon(Icons.refresh),
-              onPressed: _sending ? null : () => setState(_messages.clear),
+              onPressed: sending
+                  ? null
+                  : () => ref.read(coachChatProvider.notifier).clear(),
             ),
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty
+            child: messages.isEmpty
                 ? _Intro(onPick: (p) => _input.text = p)
                 : ListView.builder(
                     padding: const EdgeInsets.all(12),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, i) => _Bubble(message: _messages[i]),
+                    itemCount: messages.length,
+                    itemBuilder: (context, i) => _Bubble(message: messages[i]),
                   ),
           ),
-          if (_sending) const LinearProgressIndicator(),
+          if (sending) const LinearProgressIndicator(),
           SafeArea(
             top: false,
             child: Padding(
@@ -140,7 +124,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
-                    onPressed: _sending ? null : _send,
+                    onPressed: sending ? null : _send,
                     icon: const Icon(Icons.send),
                     tooltip: 'Send',
                   ),

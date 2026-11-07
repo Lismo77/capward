@@ -123,6 +123,8 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    // Same as the colour sheet: don't jump back to the last text field.
+    FocusManager.instance.primaryFocus?.unfocus();
     final picked = await showDatePicker(
       context: context,
       initialDate: _purchaseDate ?? now,
