@@ -10,7 +10,7 @@ A free, open-source Android app (web later) for building and keeping a
   key** from the provider they choose (Claude, OpenAI, Gemini, Mistral,
   OpenRouter, Groq, or a self-hosted model through Ollama).
 
-> Status: early development (0.3.0). See [docs/ROADMAP.md](docs/ROADMAP.md).
+> Status: early development (0.4.0). See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Features
 
