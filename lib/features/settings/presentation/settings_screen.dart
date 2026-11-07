@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../ai/ai_providers.dart';
+import '../../../core/settings/season_settings.dart';
 import '../../../core/app_version.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/format.dart';
@@ -75,6 +76,15 @@ class SettingsScreen extends ConsumerWidget {
             subtitle:
                 const Text('Colours, shapes and words that define your look'),
             onTap: () => context.push('/settings/style'),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.public_outlined),
+            title: const Text('Southern hemisphere'),
+            subtitle: Text('Sets the seasons uniforms use to pick in-season '
+                'options. Now: ${ref.watch(currentSeasonProvider).label}.'),
+            value: ref.watch(southernHemisphereProvider).valueOrNull ?? false,
+            onChanged: (v) =>
+                ref.read(southernHemisphereProvider.notifier).set(v),
           ),
           const _Header('Your data'),
           ListTile(

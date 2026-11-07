@@ -1,6 +1,7 @@
 # 8. Uniforms are outfits with option slots
 
-Date: 2026-11-06 · Status: accepted
+Date: 2026-11-06 · Status: accepted (amended while building it: option
+groups instead of a per-slot flag)
 
 ## Context
 A uniform is a repeatable way of dressing: the same formula most days, with
@@ -20,14 +21,18 @@ We considered three shapes:
 The app should stay small, so fewer concepts is better.
 
 ## Decision
-A uniform is an outfit where at least one slot holds several items marked as
-"pick one". It lives in the Outfits tab, is shown with a uniform label, and
-reuses the outfit builder.
+A uniform is an outfit with at least one **option group**: a set of
+interchangeable items, one of which is worn ("pick one"). It lives in the
+Outfits tab, is shown with a uniform badge, and reuses the outfit builder.
 
-- `outfit_items` gets a flag (new migration) that separates options from
-  items worn together (e.g. a shirt under a cardigan).
+- `outfit_items` gets a nullable `option_group` number (migration v5).
+  Items sharing a number within an outfit are options; null means always
+  worn. Groups rather than "one option set per slot", because shirts and
+  sweaters share the Tops slot, and a uniform can have a choice of each.
 - Picking skips options not tagged for the current season, using the
-  existing `seasons` field. A slot with nothing in season stays empty.
+  existing `seasons` field, and items not in rotation. A group with nothing
+  in season is left out. Seasons go by month, with a Settings switch for the
+  southern hemisphere.
 - The default pick is the option worn least recently (from the wear log). A
   shuffle button gives a random pick.
 - Logging a uniform records the exact items picked.
@@ -36,8 +41,8 @@ Slots are filled by hand. Rule-based slots ("any oxford shirt") are left out
 because items have no subtype or tags field.
 
 ## Consequences
-- One fewer screen and concept. Any outfit becomes a uniform by adding an
-  option to a slot.
+- One fewer screen and concept. Any outfit becomes a uniform by adding
+  options to one of its pieces.
 - Wear stats stay accurate because the log stores the items actually worn.
 - Code that reads `outfit_items` must respect the flag: for example, AI
   prompts shouldn't treat options as items worn together.

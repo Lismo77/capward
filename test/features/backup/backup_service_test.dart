@@ -6,6 +6,7 @@ import 'package:capsule_wardrobe/core/dev/sample_data.dart';
 import 'package:capsule_wardrobe/core/photos/photo_store.dart';
 import 'package:capsule_wardrobe/features/backup/data/backup_service.dart';
 import 'package:capsule_wardrobe/features/backup/domain/backup_format.dart';
+import 'package:capsule_wardrobe/features/outfits/data/outfit_repository.dart';
 import 'package:capsule_wardrobe/features/style_profile/data/style_profile_repository.dart';
 import 'package:capsule_wardrobe/features/wardrobe/data/item_repository.dart';
 import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
@@ -79,6 +80,9 @@ void main() {
         where: 'id = ?', whereArgs: [tee.id]);
     final before = await counts();
     final wearsBefore = await WearLogRepository(db).all();
+    final outfitsBefore = await OutfitRepository(db).all();
+    expect(outfitsBefore.where((o) => o.isUniform), isNotEmpty,
+        reason: 'the sample includes a uniform');
 
     // Through the real file format, as the app does it.
     final file = encodeBackup(await service.export(appVersion: '0.2.0'));
@@ -106,6 +110,8 @@ void main() {
         '${w.wornAt}|${w.outfitId}|${(w.itemIds.toList()..sort()).join(',')}';
     final wearsAfter = await WearLogRepository(db).all();
     expect(wearsAfter.map(describe), wearsBefore.map(describe));
+    expect((await OutfitRepository(db).all()).map((o) => o.optionGroups),
+        outfitsBefore.map((o) => o.optionGroups));
     expect((await StyleProfileRepository(db).get()).palette,
         sampleProfile.palette);
   });

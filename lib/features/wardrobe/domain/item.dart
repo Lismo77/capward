@@ -23,6 +23,18 @@ enum Season {
   winter;
 
   String get label => _titleCase(name);
+
+  /// The season on [day], by month (meteorological seasons: spring is
+  /// March to May in the north, September to November in the south).
+  static Season on(DateTime day, {bool southernHemisphere = false}) {
+    final north = switch (day.month) {
+      3 || 4 || 5 => Season.spring,
+      6 || 7 || 8 => Season.summer,
+      9 || 10 || 11 => Season.autumn,
+      _ => Season.winter,
+    };
+    return southernHemisphere ? values[(north.index + 2) % 4] : north;
+  }
 }
 
 enum ItemStatus {

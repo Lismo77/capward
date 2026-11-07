@@ -70,6 +70,32 @@ void main() {
         'Coat + Tee + 2 more');
   });
 
+  group('option groups', () {
+    const uniform = Outfit(
+      name: 'U',
+      itemIds: [1, 2, 3, 7],
+      optionGroups: {1: 5, 2: 5},
+    );
+
+    test('split pieces into fixed and groups', () {
+      expect(uniform.isUniform, isTrue);
+      expect(uniform.fixedItemIds, [3, 7]);
+      expect(uniform.groups, [
+        [1, 2]
+      ]);
+      expect(const Outfit(name: 'O', itemIds: [1]).isUniform, isFalse);
+    });
+
+    test('normalize drops groups of one and unselected ids, renumbers', () {
+      expect(
+        normalizeOptionGroups([1, 2, 3, 4], {1: 4, 2: 4, 3: 9, 8: 9}),
+        {1: 1, 2: 1},
+      );
+      expect(normalizeOptionGroups([3, 4, 1, 2], {1: 2, 2: 2, 3: 1, 4: 1}),
+          {3: 1, 4: 1, 1: 2, 2: 2});
+    });
+  });
+
   test('Outfit row round trip keeps source', () {
     const o = Outfit(name: 'X', source: OutfitSource.ai);
     final back = Outfit.fromRow({'id': 9, ...o.toRow()}, [1, 2]);

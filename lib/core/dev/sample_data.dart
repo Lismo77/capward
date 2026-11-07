@@ -44,6 +44,39 @@ class SampleData {
               {'outfit_id': outfitId, 'item_id': idsByName[piece]!});
         }
       }
+      final uniformId = await txn.insert(
+        'outfits',
+        Outfit(name: sampleUniform.name, notes: sampleNote).toRow(),
+      );
+      for (final piece in sampleUniform.fixed) {
+        await txn.insert('outfit_items',
+            {'outfit_id': uniformId, 'item_id': idsByName[piece]!});
+      }
+      for (final (i, options) in sampleUniform.options.indexed) {
+        for (final piece in options) {
+          await txn.insert('outfit_items', {
+            'outfit_id': uniformId,
+            'item_id': idsByName[piece]!,
+            'option_group': i + 1,
+          });
+        }
+      }
+      // Earlier wears, so rotation and "never picked" have data.
+      for (final (days, pieces) in sampleUniformWears) {
+        final wearId = await txn.insert(
+          'wear_log',
+          WearEntry(
+            wornOn: DateTime(t.year, t.month, t.day - days),
+            outfitId: uniformId,
+            itemIds: const [],
+            notes: sampleNote,
+          ).toRow(),
+        );
+        for (final piece in [...sampleUniform.fixed, ...pieces]) {
+          await txn.insert('wear_log_items',
+              {'wear_id': wearId, 'item_id': idsByName[piece]!});
+        }
+      }
       for (final wear in sampleWears(t, outfitIds, idsByName)) {
         final wearId = await txn.insert('wear_log', wear.toRow());
         for (final itemId in wear.itemIds) {
@@ -162,6 +195,32 @@ const sampleOutfits = <(String, String?, List<String>)>[
       'Grey wool scarf',
     ],
   ),
+];
+
+/// A uniform: fixed pieces plus option groups (one of each is worn).
+/// The layer group is autumn and winter only, so it's skipped in summer.
+const sampleUniform = (
+  name: 'Smart casual uniform',
+  fixed: ['Navy chore jacket', 'Brown Chelsea boots'],
+  options: [
+    ['Light blue oxford shirt', 'Black turtleneck'],
+    ['Navy merino crew-neck', 'Cream cable-knit sweater'],
+    ['Olive chinos', 'Black tailored trousers'],
+  ],
+);
+
+/// (days ago, options picked) for [sampleUniform]. Leaves the turtleneck,
+/// cable-knit and chinos unpicked.
+const sampleUniformWears = <(int, List<String>)>[
+  (
+    3,
+    [
+      'Light blue oxford shirt',
+      'Navy merino crew-neck',
+      'Black tailored trousers'
+    ]
+  ),
+  (10, ['Light blue oxford shirt', 'Black tailored trousers']),
 ];
 
 const sampleProfile = StyleProfile(

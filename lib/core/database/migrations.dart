@@ -9,6 +9,14 @@ const List<List<String>> migrations = [
   _v2,
   _v3,
   _v4,
+  _v5,
+];
+
+/// v5: uniforms. Items in an outfit that share an `option_group` number are
+/// interchangeable options: one of them is worn. Null means the item is
+/// always worn (every outfit row before v5).
+const _v5 = <String>[
+  'ALTER TABLE outfit_items ADD COLUMN option_group INTEGER',
 ];
 
 /// v4: photo bytes for platforms without a file system (the web build).

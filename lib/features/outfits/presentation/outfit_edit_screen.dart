@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/format.dart';
+import '../../../core/settings/season_settings.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../wardrobe/data/item_repository.dart';
 import '../../wardrobe/domain/item.dart';
@@ -10,11 +12,14 @@ import '../../wear_log/data/wear_log_repository.dart';
 import '../../wear_log/domain/wear_entry.dart';
 import '../../wear_log/presentation/log_wear.dart';
 import '../data/outfit_repository.dart';
+import '../data/uniform_providers.dart';
 import '../domain/outfit.dart';
+import '../domain/uniform.dart';
 import 'widgets/outfit_collage.dart';
+import 'widgets/outfit_pieces.dart';
 
 /// Manual outfit builder: pick pieces slot by slot and watch the preview and
-/// palette update.
+/// palette update. Adding options to a piece makes the outfit a uniform.
 class OutfitEditScreen extends ConsumerStatefulWidget {
   const OutfitEditScreen({
     super.key,
@@ -35,6 +40,9 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
   final _name = TextEditingController();
   final _occasion = TextEditingController();
   Set<int> _selected = {};
+
+  /// Item id to option group (see [Outfit.optionGroups]).
+  Map<int, int> _groups = {};
 
   /// Pieces as last saved. Wears log these, not unsaved edits.
   List<int> _savedItemIds = const [];
@@ -61,6 +69,7 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
         _name.text = outfit.name;
         _occasion.text = outfit.occasion ?? '';
         _selected = outfit.itemIds.toSet();
+        _groups = {...outfit.optionGroups};
         _savedItemIds = outfit.itemIds;
         _source = outfit.source;
         _notes = outfit.notes;
@@ -95,9 +104,49 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
       notes: _notes,
       source: _source,
       itemIds: [for (final i in ordered) i.id!],
+      optionGroups: normalizeOptionGroups(_selected, _groups),
     ));
     ref.invalidate(outfitsProvider);
     if (mounted) context.pop();
+  }
+
+  void _toggle(Item item, Map<int, Item> byId) => setState(() {
+        _selected = toggleOutfitItem(_selected, item, byId);
+        _groups = normalizeOptionGroups(_selected, _groups);
+      });
+
+  /// Opens the options sheet for a fixed piece ([ids] has one id) or an
+  /// option group, and applies the result.
+  Future<void> _editOptions(List<int> ids, List<Item> candidates) async {
+    final all = ref.read(itemsProvider).valueOrNull ?? const <Item>[];
+    final first = all.where((i) => i.id == ids.first).firstOrNull;
+    if (first == null) return;
+    final slot = OutfitSlot.forCategory(first.category);
+    final others = _selected.difference(ids.toSet());
+    final chosen = await showOptionsSheet(
+      context,
+      slotLabel: slot.label,
+      candidates: [
+        for (final item in candidates)
+          if (OutfitSlot.forCategory(item.category) == slot &&
+              !others.contains(item.id))
+            item,
+      ],
+      initial: ids.toSet(),
+    );
+    if (chosen == null || !mounted) return;
+    setState(() {
+      final group = ids.map((id) => _groups[id]).whereType<int>().firstOrNull ??
+          _groups.values.fold(0, (a, b) => a > b ? a : b) + 1;
+      final groups = {..._groups}..removeWhere((id, _) => ids.contains(id));
+      if (chosen.length > 1) {
+        for (final id in chosen) {
+          groups[id] = group;
+        }
+      }
+      _selected = {...others, ...chosen};
+      _groups = normalizeOptionGroups(_selected, groups);
+    });
   }
 
   Future<void> _delete() async {
@@ -147,10 +196,38 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
     }
     final selectedItems =
         orderForDisplay(_selected.map((id) => byId[id]).whereType<Item>());
+    final draft = Outfit(
+      id: widget.outfitId,
+      name: '',
+      itemIds: [for (final i in selectedItems) i.id!],
+      optionGroups: normalizeOptionGroups(_selected, _groups),
+    );
+    final entries = ref.watch(wearLogProvider).valueOrNull ?? const [];
+    final season = ref.watch(currentSeasonProvider);
+    final now = DateTime.now();
+    final shuffle =
+        _isNew ? null : ref.watch(shuffledPicksProvider)[widget.outfitId!];
+    final todayIds = piecesForToday(
+      draft,
+      byId: byId,
+      entries: entries,
+      now: now,
+      season: season,
+      // A shuffle made before editing only counts if its pieces are all
+      // still in the outfit.
+      shuffled: shuffle != null &&
+              shuffle.day == dateOnly(now) &&
+              shuffle.itemIds.every(_selected.contains)
+          ? shuffle.itemIds
+          : null,
+    );
+    final todayItems =
+        orderForDisplay(todayIds.map((id) => byId[id]).whereType<Item>());
+    final noun = draft.isUniform ? 'uniform' : 'outfit';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New outfit' : 'Edit outfit'),
+        title: Text(_isNew ? 'New $noun' : 'Edit $noun'),
         actions: [
           if (!_isNew)
             IconButton(
@@ -167,12 +244,9 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          _Preview(items: selectedItems),
+          _Preview(items: todayItems, uniform: draft.isUniform),
           if (!_isNew && _savedItemIds.isNotEmpty)
-            _OutfitWearRow(
-              outfitId: widget.outfitId!,
-              itemIds: _savedItemIds,
-            ),
+            _OutfitWearRow(outfitId: widget.outfitId!),
           const SizedBox(height: 16),
           TextField(
             controller: _name,
@@ -190,6 +264,13 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
               hintText: 'office, weekend, dinner...',
             ),
           ),
+          OutfitPieces(
+            outfit: draft,
+            byId: byId,
+            season: season,
+            wearDays: _isNew ? const {} : optionWearDays(draft, entries),
+            onEditOptions: (ids) => _editOptions(ids, candidates),
+          ),
           if (candidates.isEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 24),
@@ -201,8 +282,7 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
                 slot: slot,
                 items: bySlot[slot]!,
                 selected: _selected,
-                onTap: (item) => setState(
-                    () => _selected = toggleOutfitItem(_selected, item, byId)),
+                onTap: (item) => _toggle(item, byId),
               ),
         ],
       ),
@@ -211,9 +291,11 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
 }
 
 class _Preview extends StatelessWidget {
-  const _Preview({required this.items});
+  const _Preview({required this.items, required this.uniform});
 
+  /// For a uniform, today's pick.
   final List<Item> items;
+  final bool uniform;
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +317,8 @@ class _Preview extends StatelessWidget {
                 Text(
                   items.isEmpty
                       ? 'Tap pieces below to build an outfit'
-                      : '${items.length} ${items.length == 1 ? 'piece' : 'pieces'}',
+                      : '${uniform ? "Today's pick · " : ''}'
+                          '${items.length} ${items.length == 1 ? 'piece' : 'pieces'}',
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -247,12 +330,12 @@ class _Preview extends StatelessWidget {
   }
 }
 
-/// Wear count plus the "Wear this" / "Wearing" toggle.
+/// Wear count plus the "Wear this" / "Wearing" toggle, and "Shuffle" for a
+/// uniform. Works on the saved outfit, not unsaved edits.
 class _OutfitWearRow extends ConsumerWidget {
-  const _OutfitWearRow({required this.outfitId, required this.itemIds});
+  const _OutfitWearRow({required this.outfitId});
 
   final int outfitId;
-  final List<int> itemIds;
 
   Future<void> _confirmRemove(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -282,6 +365,12 @@ class _OutfitWearRow extends ConsumerWidget {
     final current = ref.watch(currentOutfitWearProvider);
     final wearing = current?.outfitId == outfitId;
     final count = outfitWearCount(entries, outfitId);
+    final itemIds = ref.watch(todaysPiecesProvider(outfitId));
+    final outfit = ref
+        .watch(outfitsProvider)
+        .valueOrNull
+        ?.where((o) => o.id == outfitId)
+        .firstOrNull;
 
     final String status;
     if (wearing && current!.wornAt != null) {
@@ -307,6 +396,13 @@ class _OutfitWearRow extends ConsumerWidget {
           Expanded(
             child: Text(status, style: Theme.of(context).textTheme.bodyMedium),
           ),
+          if (outfit != null && outfit.isUniform && !wearing)
+            IconButton(
+              icon: const Icon(Icons.shuffle),
+              tooltip: 'Shuffle today\'s pick',
+              onPressed: () =>
+                  ref.read(shuffledPicksProvider.notifier).shuffle(outfit),
+            ),
           if (wearing)
             FilledButton.icon(
               icon: const Icon(Icons.check, size: 18),
