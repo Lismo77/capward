@@ -66,6 +66,12 @@ fit profile, not in the uniform.
 - [ ] Random outfit: the AI picks a good combination from what you own, with a short reason
 - [ ] Outfit vibe: describe a vibe ("cosy library day", "sharp but relaxed dinner") and the AI builds it from your wardrobe
 - [ ] Both return structured JSON (item ids and a reason) and appear as outfit cards you can save
+- [ ] **Must have.** "Create outfit" from coach chat: when the coach suggests
+  an outfit from the user's items, a button under the reply opens the outfit
+  builder pre-filled with those items, to check and save. The prompt already
+  gives each item an `[id]`; the coach adds a small machine-readable block
+  of ids, which the app hides from the reply text. The builder already takes
+  pre-selected items (`initialItemIds`).
 - [ ] "Fill in from photo": the AI suggests category, colours, material and seasons
 - [ ] Gap analysis and purchase check ("does this fit my capsule or uniform, or duplicate something?")
 
