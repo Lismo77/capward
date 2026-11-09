@@ -29,34 +29,22 @@ numbers: release-please sets versions from commit types (ADR 0006), and
 - [x] Turn on GitHub Pages and share the link with testers
 - [x] Export/import backup: a .zip of all data and photos (Settings → Your data)
 
-## Uniforms *(next)*
-A uniform is an outfit where some slots hold several interchangeable options
-instead of one item (e.g. shirt = any of 4 oxfords; shoes = brown Gibsons).
-It is built on outfits, not as a separate system: one entry replaces dozens
-of near-identical saved outfits. No AI needed.
+## Uniforms *(done, in 0.4.0)*
+A uniform is an outfit with option groups: sets of interchangeable items, one
+of which is worn (e.g. shirt = any of 4 oxfords; shoes = brown Gibsons). It
+is built on outfits, not as a separate system (ADR 0008). No AI needed.
 
-- [ ] Option slots: in the outfit builder, a slot can hold several items marked
-  as "pick one". Needs a per-item flag on `outfit_items` (new migration) so
-  options are kept apart from items worn together (e.g. a shirt under a
-  cardigan). An outfit with at least one option slot shows as a uniform.
-- [ ] Season-aware: when picking, skip options not tagged for the current
-  season. A slot with no in-season options is left empty (e.g. no layer in
-  summer). Uses the existing `seasons` field on items.
-- [ ] Today's pick: choose the option worn least recently (from the wear log),
-  so wear is spread evenly. A "shuffle" button rerolls with a random pick.
-- [ ] Palette bar: shows the fixed items plus today's pick, and updates on
-  shuffle. Nice-to-have: in the detail view, a small row of swatches per
-  option slot showing all its options.
-- [ ] Wear it: logging a uniform records the exact items picked, so cost per
-  wear and other stats stay accurate.
-- [ ] Turn any saved outfit into a uniform by adding options to a slot.
-- [ ] Uniform stats: how often each uniform is worn, and options that never
-  get picked.
-
-Not in this milestone: rule-based slots ("any oxford shirt") that pick up new items
-automatically. Items have no subtype or tags field yet, so slots are filled by
-hand. Colour and fit preferences belong in the style profile and the body and
-fit profile, not in the uniform.
+- [x] Option groups: in the outfit builder, tap ⇄ on a piece to add options.
+  Stored as `outfit_items.option_group` (migration v5). Groups rather than one
+  choice per slot, so shirts and sweaters (both Tops) can each have options.
+- [x] Season-aware: picking skips options out of season or not in rotation. A
+  group with nothing in season is left out (e.g. no layer in summer).
+  Southern hemisphere switch in Settings.
+- [x] Today's pick: the option worn longest ago. "Shuffle" rerolls at random.
+- [x] Palette bar and collage show the fixed items plus today's pick.
+- [x] Wear it: logging a uniform records the exact items picked.
+- [x] Turn any saved outfit into a uniform by adding options to a piece.
+- [x] Uniform stats: wear count, and options that never get picked.
 
 ## Body and fit profile
 - [ ] Optional: height, build, proportions, fit preferences, skin undertone and colouring
@@ -83,6 +71,10 @@ fit profile, not in the uniform.
   comes back when capsules are built. Starting idea: a capsule is a subset of items with a target size and season, and outfits and uniforms can be limited to one capsule.
 
 ## Later
+- [ ] Uniforms: a row of swatches per option group in the detail view,
+  showing the uniform's full colour range
+- [ ] Uniforms: rule-based option groups ("any oxford shirt") that pick up
+  new items automatically. Needs a subtype or tags field on items first.
 - [ ] Log a wear for an earlier day (only today can be logged for now)
 - [ ] Calendar: plan outfits on days (planned vs worn)
 - [ ] Scheduled outfit check-in: on the day, ask "Wearing this?" Yes logs it;
