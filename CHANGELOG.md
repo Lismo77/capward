@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/Lismo77/capward/compare/v0.4.0...v0.5.0) (2026-11-09)
+
+
+### Features
+
+* create an outfit from a coach suggestion ([#15](https://github.com/Lismo77/capward/issues/15)) ([87e401b](https://github.com/Lismo77/capward/commit/87e401b8b1c055dcd418ea51da366d1a3eed7678))
+
 ## [0.4.0](https://github.com/Lismo77/capward/compare/v0.3.0...v0.4.0) (2026-11-07)
 
 
