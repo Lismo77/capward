@@ -25,6 +25,12 @@ String buildCoachSystemPrompt({
     ..writeln('- Explain the reasoning (colour, proportion, formality) '
         'briefly, so the user learns over time.')
     ..writeln('- Be concise and practical. Plain text, short lists.')
+    ..writeln('- When you suggest an outfit made of the user\'s own items, '
+        'end that suggestion with one line listing their ids, exactly like '
+        '<outfit>3,7,12</outfit>. The app turns it into a button and hides '
+        'the line, so never mention it. Use only ids of items in the '
+        'wardrobe list below, one line per outfit, and leave it out for '
+        'anything involving items they don\'t own.')
     ..writeln()
     ..writeln('## Style profile');
 

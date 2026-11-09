@@ -5,7 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../ai/ai_client.dart';
 import '../../../ai/ai_providers.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../wardrobe/data/item_repository.dart';
+import '../../wardrobe/domain/item.dart';
 import '../data/coach_chat.dart';
+import '../domain/coach_reply.dart';
 
 const _starterPrompts = [
   'Suggest an outfit for a casual Friday at the office',
@@ -171,15 +174,27 @@ class _Intro extends StatelessWidget {
   }
 }
 
-class _Bubble extends StatelessWidget {
+class _Bubble extends ConsumerWidget {
   const _Bubble({required this.message});
 
   final AiMessage message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final isUser = message.role == AiRole.user;
+    final reply = isUser ? null : parseCoachReply(message.text);
+    // Only offer outfits made of items that are still in the wardrobe.
+    final owned = {
+      for (final i in ref.watch(itemsProvider).valueOrNull ?? const <Item>[])
+        if (i.status == ItemStatus.active) i.id,
+    };
+    final outfits = [
+      for (final ids in reply?.outfits ?? const <List<int>>[])
+        if (ids.where(owned.contains).toList() case final valid
+            when valid.isNotEmpty)
+          valid,
+    ];
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -192,7 +207,25 @@ class _Bubble extends StatelessWidget {
               isUser ? scheme.primaryContainer : scheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: SelectableText(message.text),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SelectableText(reply?.text ?? message.text),
+            for (var i = 0; i < outfits.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.checkroom_outlined),
+                  label: Text(outfits.length == 1
+                      ? 'Create outfit'
+                      : 'Create outfit ${i + 1}'),
+                  onPressed: () =>
+                      context.push('/outfits/new', extra: outfits[i]),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
