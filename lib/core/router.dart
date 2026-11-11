@@ -142,10 +142,16 @@ class HomeShell extends ConsumerWidget {
           if (showToday) const TodayBar(),
           Expanded(
             key: const ValueKey('tab-body'),
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: showToday,
-              child: child,
+            // Read MediaQuery from inside this Scaffold, where it has already
+            // taken the keyboard out. The outer context still has it, and
+            // passing that down made pages make room for the keyboard twice,
+            // shrinking them to nothing (blank screen while typing).
+            child: Builder(
+              builder: (context) => MediaQuery.removePadding(
+                context: context,
+                removeTop: showToday,
+                child: child,
+              ),
             ),
           ),
         ],
