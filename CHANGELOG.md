@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/Lismo77/gansey/compare/v0.7.2...v0.7.3) (2026-11-11)
+
+
+### Bug fixes
+
+* screens no longer go blank while typing ([#35](https://github.com/Lismo77/gansey/issues/35)) ([872e16a](https://github.com/Lismo77/gansey/commit/872e16a60d78b3a081840779fd295a78ba6b4955))
+
 ## [0.7.2](https://github.com/Lismo77/gansey/compare/v0.7.1...v0.7.2) (2026-11-11)
 
 
