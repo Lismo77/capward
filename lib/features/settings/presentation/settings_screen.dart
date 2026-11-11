@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../ai/ai_providers.dart';
 import '../../../core/settings/season_settings.dart';
 import '../../../core/app_version.dart';
-import '../../../core/keyboard/keyboard_inset_fix.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/format.dart';
 import '../../../core/dev/sample_data.dart';
@@ -141,17 +140,6 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: const Text('Opens a draft for you to review and send'),
             onTap: () => context.push('/settings/feedback'),
           ),
-          if (canMeasureKeyboard)
-            SwitchListTile(
-              secondary: const Icon(Icons.keyboard_outlined),
-              title: const Text('Show keyboard measurements'),
-              subtitle: const Text(
-                'For fixing text boxes hidden behind the keyboard',
-              ),
-              value: ref.watch(keyboardDebugProvider),
-              onChanged: (on) =>
-                  ref.read(keyboardDebugProvider.notifier).state = on,
-            ),
           const _Header('About'),
           AboutListTile(
             icon: const Icon(Icons.info_outline),
