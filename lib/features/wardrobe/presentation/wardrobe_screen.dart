@@ -41,15 +41,15 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
 
   void _clearSelection() => setState(() => _selected = {});
 
-  void _setFilter(ItemCategory? filter, List<Item> all,
-      {bool retired = false}) {
+  void _setFilter(ItemCategory? filter, {bool retired = false}) {
     setState(() {
+      // Category chips keep the selection, so an outfit can be picked one
+      // category at a time (a top, then Bottoms, then Shoes). Switching
+      // between the wardrobe in use and Retired clears it: those are
+      // different sets, and bulk actions shouldn't mix them.
+      if (retired != _retired) _selected = {};
       _filter = filter;
       _retired = retired;
-      // Never keep hidden items selected - bulk actions should only touch
-      // what the user can see.
-      final visible = _visible(all).map((i) => i.id).toSet();
-      _selected = _selected.where(visible.contains).toSet();
     });
   }
 
@@ -171,19 +171,17 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     children: [
-                      _chip(
-                          'All (${inUse.length})',
-                          !retired && _filter == null,
-                          () => _setFilter(null, all)),
+                      _chip('All (${inUse.length})',
+                          !retired && _filter == null, () => _setFilter(null)),
                       for (final c in ItemCategory.values)
                         if (inUse.any((i) => i.category == c))
                           _chip(c.label, !retired && _filter == c,
-                              () => _setFilter(c, all)),
+                              () => _setFilter(c)),
                       // Kept apart from the categories: retired pieces are
                       // history, not part of the wardrobe in use.
                       if (retiredCount > 0)
                         _chip('Retired ($retiredCount)', retired,
-                            () => _setFilter(null, all, retired: true)),
+                            () => _setFilter(null, retired: true)),
                     ],
                   ),
                 ),
@@ -250,8 +248,10 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
         IconButton(
           icon: Icon(allSelected ? Icons.deselect : Icons.select_all),
           tooltip: allSelected ? 'Deselect all' : 'Select all',
-          onPressed: () => setState(() =>
-              _selected = allSelected ? {} : {..._selected, ...visibleIds}),
+          // Only touches what's on screen, so picks in other categories stay.
+          onPressed: () => setState(() => _selected = allSelected
+              ? _selected.difference(visibleIds)
+              : {..._selected, ...visibleIds}),
         ),
         IconButton(
           icon: const Icon(Icons.event_available_outlined),

@@ -60,28 +60,58 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     return report;
   }
 
-  Future<void> _open(Uri uri, {required String failure}) async {
+  /// Returns whether the draft opened.
+  Future<bool> _open(Uri uri, {required String failure}) async {
     try {
-      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        return true;
+      }
     } catch (_) {
       // Fall through to the message below.
     }
     _say(failure);
+    return false;
+  }
+
+  /// Empties the form once the text has gone somewhere else. The app can't
+  /// tell whether the draft was actually sent, so Undo brings it back.
+  void _clearSent(String message) {
+    if (!mounted) return;
+    final title = _title.text;
+    final details = _details.text;
+    _title.clear();
+    _details.clear();
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(message),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            _title.text = title;
+            _details.text = details;
+          },
+        ),
+      ));
   }
 
   Future<void> _github() async {
     final report = _checked();
     if (report == null) return;
-    await _open(report.githubIssueUri,
-        failure: 'Could not open the browser. Try "Copy text" instead.');
+    if (await _open(report.githubIssueUri,
+        failure: 'Could not open the browser. Try "Copy text" instead.')) {
+      _clearSent('Draft opened in GitHub. Form cleared.');
+    }
   }
 
   Future<void> _email() async {
     final report = _checked();
     final uri = report?.mailtoUri;
     if (uri == null) return;
-    await _open(uri,
-        failure: 'Could not open a mail app. Try "Copy text" instead.');
+    if (await _open(uri,
+        failure: 'Could not open a mail app. Try "Copy text" instead.')) {
+      _clearSent('Draft opened in your mail app. Form cleared.');
+    }
   }
 
   Future<void> _copy() async {
@@ -89,7 +119,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     if (report == null) return;
     await Clipboard.setData(
         ClipboardData(text: '${report.subject}\n\n${report.body}'));
-    _say('Copied');
+    _clearSent('Copied. Form cleared.');
   }
 
   @override
