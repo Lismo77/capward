@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/Lismo77/gansey/compare/v0.8.0...v0.8.1) (2026-11-11)
+
+
+### Bug fixes
+
+* keep selections across category filters and clear the report form ([#40](https://github.com/Lismo77/gansey/issues/40)) ([87322d6](https://github.com/Lismo77/gansey/commit/87322d614d94aeca2bfe140f6ddbbf2b09d658a2))
+
 ## [0.8.0](https://github.com/Lismo77/gansey/compare/v0.7.3...v0.8.0) (2026-11-11)
 
 
