@@ -34,5 +34,6 @@ of a person are the most sensitive thing the app could send.
   old threads stay readable. They count towards backup size.
 - A later "Archive thread" feature will let the user either delete a
   thread's photos or keep downscaled copies, to reclaim space.
-- The AI options now live on the main Settings screen. A dedicated AI
-  settings screen is planned to hold this switch and future AI options.
+- The AI on/off switch is on the main Settings screen and the provider setup
+  is on the AI settings screen. This switch and future AI options go on the
+  AI settings screen, and the on/off switch moves there too.

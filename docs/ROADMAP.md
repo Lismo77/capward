@@ -76,9 +76,10 @@ fit profile, not in the uniform.
 - [ ] Gap analysis and purchase check ("does this fit my capsule or uniform, or duplicate something?")
 
 ## AI coach photos and threads *(priority, tester feedback)*
-- [ ] Dedicated AI settings screen. Holds the provider setup now on the main
-  Settings screen, and gives room for more AI options later (photos, body
-  details, model choices).
+- [ ] Grow the AI settings screen (`/settings/ai`, provider setup only today)
+  into the home for all AI options: move the on/off switch there from the
+  main Settings screen, and add room for more later (photos, body details,
+  model choices).
 - [ ] Photo sharing setting: a separate "Let the AI see photos" switch in AI
   settings, off by default, hidden controls when off (ADR 0009).
 - [ ] Attach photos in coach chat, per message. Two uses: a piece you're
