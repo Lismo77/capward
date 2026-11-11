@@ -75,8 +75,39 @@ fit profile, not in the uniform.
 - [ ] "Fill in from photo": the AI suggests category, colours, material and seasons
 - [ ] Gap analysis and purchase check ("does this fit my capsule or uniform, or duplicate something?")
 
+## AI coach photos and threads *(priority, tester feedback)*
+- [ ] Dedicated AI settings screen. Holds the provider setup now on the main
+  Settings screen, and gives room for more AI options later (photos, body
+  details, model choices).
+- [ ] Photo sharing setting: a separate "Let the AI see photos" switch in AI
+  settings, off by default, hidden controls when off (ADR 0009).
+- [ ] Attach photos in coach chat, per message. Two uses: a piece you're
+  thinking of buying (does it fit the wardrobe, is the price and quality
+  good), and you wearing an item (fit, body type, colouring).
+- [ ] Saveable coach threads: continue a styling session later. Photos in a
+  thread are stored locally with it so it stays readable.
+- [ ] Archive thread: when archiving, delete the thread's photos or keep
+  downscaled copies, to save space.
+- [ ] Coach asks clarifying questions before building an outfit (e.g. the
+  dress code for a wedding).
+
 ## Photos
 - [ ] Background removal, on-device. Needs an open-licensed model (e.g. U²-Net, Apache-2.0) and no Google ML Kit. Expect it to add a few MB to the app.
+- [ ] Rotate item photos in-app. Maybe also auto rotate/crop on upload,
+  possibly as part of the background-removal tool.
+- [ ] Easier to see the whole photo inside an item or outfit.
+
+## Tester readiness *(priority)*
+- [ ] Bug and missing-feature report route for testers, plus a gap check on
+  anything else needed before recruiting testers in forums.
+
+## Item details
+- [ ] Sizing: record the size, and flag pieces that may not currently fit.
+- [ ] Hats as their own category (you can only wear one).
+- [ ] Price paid: blank means unknown, 0 means free or gift.
+- [ ] Retired items hidden from the main dashboard, reachable from another menu.
+- [ ] Colour picker accuracy (reported as imprecise).
+- [ ] Full-screen outfit view with the palette bar on top or bottom.
 
 ## Capsules
 - [ ] To be designed. Its placeholder tab was replaced by Stats in 0.2.0 and
