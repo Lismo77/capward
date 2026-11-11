@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/Lismo77/gansey/compare/v0.5.0...v0.6.0) (2026-11-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename the app to Gansey ([#20](https://github.com/Lismo77/gansey/issues/20))
+
+### Features
+
+* Gansey app icon ([#22](https://github.com/Lismo77/gansey/issues/22)) ([836ea46](https://github.com/Lismo77/gansey/commit/836ea46462b1db5f0f83f4ccb469717815f65566))
+* rename the app to Gansey ([#20](https://github.com/Lismo77/gansey/issues/20)) ([5a92547](https://github.com/Lismo77/gansey/commit/5a9254757df8fdf750486820ca9fe5523bbd761b))
+* report a bug or idea from Settings ([#18](https://github.com/Lismo77/gansey/issues/18)) ([1ac0cf0](https://github.com/Lismo77/gansey/commit/1ac0cf0ff3838b7107279b8d103d5dd966467b2a))
+
 ## [0.5.0](https://github.com/Lismo77/capward/compare/v0.4.0...v0.5.0) (2026-11-09)
 
 
