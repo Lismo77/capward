@@ -98,6 +98,26 @@ fit profile, not in the uniform.
   possibly as part of the background-removal tool.
 - [ ] Easier to see the whole photo inside an item or outfit.
 
+## Rename to Wornwell *(next, before recruiting testers)*
+Do this before the app is posted anywhere. Changing the Android application
+id later makes the new build a separate app, so installed testers would lose
+their data on upgrade. With no outside testers yet, it costs nothing now.
+
+- [ ] Check "Wornwell" isn't taken on F-Droid, Google Play or as a GitHub
+  project, and isn't an obvious trademark clash.
+- [ ] App label, Android `applicationId` and `namespace`
+  (`io.github.lismo77.capsulewardrobe`), web manifest and title, about
+  screen, docs and CLAUDE.md.
+- [ ] Dart package name (`capsule_wardrobe`), which touches imports in `lib/`
+  and `test/`.
+- [ ] Rename the GitHub repo (old links redirect). Update `issuesNewUrl` and
+  the GitHub Pages link testers use.
+- [ ] Backup files: write `wornwell-backup-...zip`, but keep importing the
+  old `capward-backup` format.
+- [ ] Leave the on-device database filename alone. It is internal, and
+  renaming it would risk losing existing data.
+- [ ] Record the decision as an ADR.
+
 ## Tester readiness *(priority)*
 - [ ] Bug and missing-feature report route for testers, plus a gap check on
   anything else needed before recruiting testers in forums.
@@ -130,6 +150,6 @@ fit profile, not in the uniform.
   can't read the old format. Going 9 → 11 directly would lose saved API keys.
 
 ## First public release (1.0)
-- [ ] Final name and icon. Check that "Capward" isn't taken on F-Droid or Play before committing to it.
+- [ ] Final icon (the name is handled in "Rename to Wornwell").
 - [ ] F-Droid metadata (`fastlane/metadata/android/...`), screenshots, reproducible build
 - [ ] Submit to F-Droid. Expect the "NonFreeNet" anti-feature label because the app can talk to proprietary AI services.
