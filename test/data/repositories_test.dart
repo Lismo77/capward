@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:capsule_wardrobe/core/database/app_database.dart';
-import 'package:capsule_wardrobe/core/database/migrations.dart';
-import 'package:capsule_wardrobe/core/dev/sample_data.dart';
-import 'package:capsule_wardrobe/features/outfits/data/outfit_repository.dart';
-import 'package:capsule_wardrobe/features/outfits/domain/outfit.dart';
-import 'package:capsule_wardrobe/features/wardrobe/data/item_repository.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
-import 'package:capsule_wardrobe/features/wear_log/data/wear_log_repository.dart';
-import 'package:capsule_wardrobe/features/wear_log/domain/wear_entry.dart';
-import 'package:capsule_wardrobe/features/wear_log/domain/wear_stats.dart';
+import 'package:gansey/core/database/app_database.dart';
+import 'package:gansey/core/database/migrations.dart';
+import 'package:gansey/core/dev/sample_data.dart';
+import 'package:gansey/features/outfits/data/outfit_repository.dart';
+import 'package:gansey/features/outfits/domain/outfit.dart';
+import 'package:gansey/features/wardrobe/data/item_repository.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/wear_log/data/wear_log_repository.dart';
+import 'package:gansey/features/wear_log/domain/wear_entry.dart';
+import 'package:gansey/features/wear_log/domain/wear_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -208,7 +208,7 @@ void main() {
   });
 
   test('upgrading a v1 database keeps colours as swatches', () async {
-    final dir = await Directory.systemTemp.createTemp('capward_test');
+    final dir = await Directory.systemTemp.createTemp('gansey_test');
     final path = '${dir.path}/v1.db';
     final v1 = await openDatabase(path, version: 1, onCreate: (db, _) async {
       for (final sql in migrations.first) {

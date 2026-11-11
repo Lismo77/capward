@@ -1,4 +1,4 @@
-package io.github.lismo77.capsulewardrobe
+package io.github.lismo77.gansey
 
 import io.flutter.embedding.android.FlutterActivity
 

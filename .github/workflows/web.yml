@@ -1,5 +1,5 @@
 # Builds the web version (PWA for iPhone testers) and publishes it to GitHub
-# Pages at https://lismo77.github.io/capward/.
+# Pages at https://lismo77.github.io/gansey/.
 #
 # Runs when a release is made (called from release.yml), so testers only get
 # released versions. Run it by hand from the Actions tab to redeploy main.
@@ -40,7 +40,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - run: tool/build_web.sh /capward/
+      - run: tool/build_web.sh /gansey/
       - uses: actions/upload-pages-artifact@v5
         with:
           path: build/web

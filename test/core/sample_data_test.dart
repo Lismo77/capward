@@ -1,5 +1,5 @@
-import 'package:capsule_wardrobe/core/dev/sample_data.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
+import 'package:gansey/core/dev/sample_data.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -143,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
           const _Header('About'),
           AboutListTile(
             icon: const Icon(Icons.info_outline),
-            applicationName: 'Capward',
+            applicationName: 'Gansey',
             applicationVersion: ref.watch(appVersionProvider).valueOrNull,
             applicationLegalese:
                 'Free software under the GNU General Public License v3. '

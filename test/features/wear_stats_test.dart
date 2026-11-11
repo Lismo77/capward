@@ -1,7 +1,7 @@
-import 'package:capsule_wardrobe/features/outfits/domain/outfit.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
-import 'package:capsule_wardrobe/features/wear_log/domain/wear_entry.dart';
-import 'package:capsule_wardrobe/features/wear_log/domain/wear_stats.dart';
+import 'package:gansey/features/outfits/domain/outfit.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/wear_log/domain/wear_entry.dart';
+import 'package:gansey/features/wear_log/domain/wear_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final today = DateTime(2026, 11, 6);

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
-/// A Capward backup is a zip:
+/// A Gansey backup is a zip:
 ///
 /// ```
 /// manifest.json         format, versions, export time, row counts
@@ -14,7 +14,11 @@ import 'package:archive/archive.dart';
 /// Plain JSON rather than a copy of the SQLite file, so the same backup
 /// works on Android and the web (which store photos differently) and can be
 /// opened and read by hand.
-const backupFormat = 'capward-backup';
+const backupFormat = 'gansey-backup';
+
+/// Format names written by earlier versions, which import the same way.
+/// The app was called Capward before 0.6 (ADR 0010).
+const legacyBackupFormats = {'capward-backup'};
 
 /// Bump when the zip layout changes in a way older apps can't read.
 const backupFormatVersion = 1;
@@ -96,9 +100,9 @@ Uint8List encodeBackup(Backup backup) {
 /// Reads a backup made by [encodeBackup]. Throws [BackupException] if the
 /// file isn't a backup, is damaged, or comes from a newer app.
 Backup decodeBackup(Uint8List bytes, {required int currentSchemaVersion}) {
-  const notBackup = BackupException("This file isn't a Capward backup.");
+  const notBackup = BackupException("This file isn't a Gansey backup.");
   const tooNew = BackupException('This backup was made by a newer version of '
-      'Capward. Update the app, then try again.');
+      'Gansey. Update the app, then try again.');
 
   final Archive archive;
   try {
@@ -118,7 +122,11 @@ Backup decodeBackup(Uint8List bytes, {required int currentSchemaVersion}) {
   }
 
   final manifest = readJson(_manifestName);
-  if (manifest is! Map || manifest['format'] != backupFormat) throw notBackup;
+  if (manifest is! Map) throw notBackup;
+  final format = manifest['format'];
+  if (format != backupFormat && !legacyBackupFormats.contains(format)) {
+    throw notBackup;
+  }
   final formatVersion = manifest['formatVersion'];
   final schemaVersion = manifest['schemaVersion'];
   if (formatVersion is! int || schemaVersion is! int) throw notBackup;
@@ -164,8 +172,8 @@ String photoExtension(Uint8List bytes) {
   return '.jpg';
 }
 
-/// "capward-backup-2026-11-06.zip"
+/// "gansey-backup-2026-11-06.zip"
 String backupFileName(DateTime now) {
   String two(int n) => n.toString().padLeft(2, '0');
-  return 'capward-backup-${now.year}-${two(now.month)}-${two(now.day)}.zip';
+  return 'gansey-backup-${now.year}-${two(now.month)}-${two(now.day)}.zip';
 }

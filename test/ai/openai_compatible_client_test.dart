@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:capsule_wardrobe/ai/ai_client.dart';
-import 'package:capsule_wardrobe/ai/openai_compatible_client.dart';
+import 'package:gansey/ai/ai_client.dart';
+import 'package:gansey/ai/openai_compatible_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';

@@ -1,4 +1,4 @@
-import 'package:capsule_wardrobe/features/feedback/domain/feedback_report.dart';
+import 'package:gansey/features/feedback/domain/feedback_report.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -47,7 +47,7 @@ void main() {
         details: 'Line one\nLine two #1');
     final uri = report.githubIssueUri;
     expect(uri.host, 'github.com');
-    expect(uri.path, '/Lismo77/capward/issues/new');
+    expect(uri.path, '/Lismo77/gansey/issues/new');
     expect(uri.queryParameters['title'], 'Idea: Dark & light');
     expect(uri.queryParameters['body'], 'Line one\nLine two #1');
     expect(uri.queryParameters['labels'], 'enhancement');
