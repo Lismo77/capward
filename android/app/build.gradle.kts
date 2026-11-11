@@ -1,3 +1,25 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+// Release signing (ADR 0011). On a laptop the key comes from
+// android/key.properties (git-ignored); in CI from environment variables set
+// from GitHub secrets. Without either, release builds fall back to the debug
+// key so `flutter run --release` still works, unless
+// ANDROID_REQUIRE_RELEASE_KEY=true (set by the release workflow).
+val keyProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) FileInputStream(file).use { load(it) }
+}
+
+fun signingValue(property: String, env: String): String? =
+    keyProperties.getProperty(property) ?: System.getenv(env)
+
+val releaseStoreFile = signingValue("storeFile", "ANDROID_KEYSTORE_PATH")
+
+if (releaseStoreFile == null && System.getenv("ANDROID_REQUIRE_RELEASE_KEY") == "true") {
+    throw GradleException("Release key required but not found. Set ANDROID_KEYSTORE_PATH or create android/key.properties.")
+}
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -29,11 +51,23 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "ANDROID_KEY_ALIAS")
+                // PKCS12 keystores use the store password for the key too.
+                keyPassword = signingValue("keyPassword", "ANDROID_KEYSTORE_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(
+                if (releaseStoreFile != null) "release" else "debug"
+            )
         }
     }
 }

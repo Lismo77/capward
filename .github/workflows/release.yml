@@ -3,8 +3,8 @@
 # On every push to main it reads the conventional commits since the last
 # release and keeps a "chore(main): release X.Y.Z" pull request up to date.
 # That PR bumps pubspec.yaml (version and +build number) and CHANGELOG.md.
-# Merging it tags vX.Y.Z, creates a GitHub release and deploys the web
-# version; F-Droid builds the tags.
+# Merging it tags vX.Y.Z, creates a GitHub release, attaches a signed APK
+# and deploys the web version; F-Droid builds the tags.
 #
 # One-time setup: Settings -> Actions -> General -> Workflow permissions ->
 # tick "Allow GitHub Actions to create and approve pull requests".
@@ -33,7 +33,17 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # Releases made with the built-in token don't trigger other workflows, so
-  # the web deploy is called from here.
+  # the Android build and web deploy are called from here.
+  android:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
+    permissions:
+      contents: write
+
   web:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'

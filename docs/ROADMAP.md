@@ -116,7 +116,17 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
 ## Tester readiness *(priority)*
 - [x] Bug and idea report screen: Settings → Help opens a prefilled GitHub
   issue or email (ganseyapp@gmail.com), or copies the text.
-- [ ] Gap check on anything else needed before recruiting testers in forums.
+- [x] Gap check (2026-11-11). Findings below, roughly in order.
+- [x] Signed APK attached to every release, installable directly or through
+  Obtainium (ADR 0011). Install steps for testers in the README.
+- [ ] Error screen: catch crashes and offer "Report" that opens the feedback
+  screen with the error details filled in (no crash reporting service).
+- [ ] Backup reminder after two weeks without a backup. iPhone testers must
+  add the web app to the Home Screen or Safari may delete its data.
+- [ ] Welcome screen, and "Try with sample items" in release builds.
+- [ ] Log a wear for an earlier day (moved up from Later).
+- [ ] Full-screen photo view (see "Photos").
+- [ ] Nice to have: search in the wardrobe.
 
 ## Item details
 - [ ] Sizing: record the size, and flag pieces that may not currently fit.
@@ -137,7 +147,6 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
   showing the uniform's full colour range
 - [ ] Uniforms: rule-based option groups ("any oxford shirt") that pick up
   new items automatically. Needs a subtype or tags field on items first.
-- [ ] Log a wear for an earlier day (only today can be logged for now)
 - [ ] Calendar: plan outfits on days (planned vs worn)
 - [ ] Scheduled outfit check-in: on the day, ask "Wearing this?" Yes logs it;
   "No, I wore something else" lets the user pick the outfit they wore
