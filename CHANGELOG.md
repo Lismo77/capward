@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/Lismo77/gansey/compare/v0.6.0...v0.7.0) (2026-11-11)
+
+
+### Features
+
+* hats, gift prices, hidden retired items and photo rotation ([#23](https://github.com/Lismo77/gansey/issues/23)) ([3da7149](https://github.com/Lismo77/gansey/commit/3da71492e3cb5886f4fc975d77e2aa77d4c83d28))
+
 ## [0.6.0](https://github.com/Lismo77/gansey/compare/v0.5.0...v0.6.0) (2026-11-11)
 
 
