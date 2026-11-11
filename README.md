@@ -14,7 +14,20 @@ Capward until 0.6.
   key** from the provider they choose (Claude, OpenAI, Gemini, Mistral,
   OpenRouter, Groq, or a self-hosted model through Ollama).
 
-> Status: early development (0.4.0). See [docs/ROADMAP.md](docs/ROADMAP.md).
+> Status: early development. See [docs/ROADMAP.md](docs/ROADMAP.md) and the
+> [changelog](CHANGELOG.md).
+
+## Install (testers)
+
+- **Android:** download `gansey-vX.Y.Z.apk` from the latest
+  [release](https://github.com/Lismo77/gansey/releases/latest) and open it.
+  To get updates automatically, add `https://github.com/Lismo77/gansey` in
+  [Obtainium](https://github.com/ImranR98/Obtainium).
+- **iPhone:** open <https://lismo77.github.io/gansey/> in Safari, then
+  Share → **Add to Home Screen**. Safari deletes website data after 7 days
+  without a visit unless the site is on the Home Screen.
+- **Either way:** your wardrobe lives only on your device. Export a backup
+  now and then (Settings → Your data), and report bugs from Settings → Help.
 
 ## Features
 
@@ -70,6 +83,21 @@ cd build/web && python3 -m http.server 8080  # open http://localhost:8080
 ```
 
 Keep using the same port: browser data is stored per address.
+
+### Signed release builds
+
+Releases are signed in CI ([ADR 0011](docs/decisions/0011-release-signing.md)).
+To sign a local `flutter build apk --release` with the same key, create
+`android/key.properties` (git-ignored):
+
+```properties
+storeFile=/home/you/keys/gansey-release.jks
+storePassword=...
+keyAlias=gansey
+keyPassword=...
+```
+
+Without it, local release builds use the debug key.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code is laid out.
 
