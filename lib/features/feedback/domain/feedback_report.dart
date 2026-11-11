@@ -3,13 +3,11 @@
 /// themselves.
 library;
 
-const issuesNewUrl = 'https://github.com/Lismo77/capward/issues/new';
+const issuesNewUrl = 'https://github.com/Lismo77/gansey/issues/new';
 
-/// Public contact address for testers without a GitHub account.
-///
-/// TODO(owner): set this before recruiting testers. While it is empty the
-/// "Send by email" button is hidden.
-const feedbackEmail = '';
+/// Public contact address for testers without a GitHub account. When empty,
+/// the "Send by email" button is hidden.
+const feedbackEmail = 'ganseyapp@gmail.com';
 
 /// Browsers and mail apps reject very long links, so the body is cut to this
 /// many characters when it goes into a link. "Copy text" keeps all of it.

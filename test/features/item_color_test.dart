@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:capsule_wardrobe/features/wardrobe/domain/color_extraction.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/wardrobe/domain/color_extraction.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A w x h RGBA image filled with [background], with a [foreground]

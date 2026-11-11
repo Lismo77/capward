@@ -1,5 +1,5 @@
-import 'package:capsule_wardrobe/features/outfits/domain/outfit.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/outfits/domain/outfit.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Item _item(int id, String name, ItemCategory category,

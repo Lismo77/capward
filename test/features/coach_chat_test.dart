@@ -1,8 +1,8 @@
-import 'package:capsule_wardrobe/ai/ai_client.dart';
-import 'package:capsule_wardrobe/features/coach/data/coach_chat.dart';
-import 'package:capsule_wardrobe/features/style_profile/data/style_profile_repository.dart';
-import 'package:capsule_wardrobe/features/style_profile/domain/style_profile.dart';
-import 'package:capsule_wardrobe/features/wardrobe/data/item_repository.dart';
+import 'package:gansey/ai/ai_client.dart';
+import 'package:gansey/features/coach/data/coach_chat.dart';
+import 'package:gansey/features/style_profile/data/style_profile_repository.dart';
+import 'package:gansey/features/style_profile/domain/style_profile.dart';
+import 'package:gansey/features/wardrobe/data/item_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

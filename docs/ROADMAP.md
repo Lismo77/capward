@@ -1,6 +1,6 @@
 # Roadmap
 
-Working name: **Capward** (capsule + wardrobe), being renamed to **Gansey**.
+**Gansey**, formerly Capward (ADR 0010).
 
 Direction: minimalist and anti-consumption. Help people wear what they own and
 build a consistent "uniform". AI features are hidden when AI is off.
@@ -86,7 +86,7 @@ is built on outfits, not as a separate system (ADR 0008). No AI needed.
   possibly as part of the background-removal tool.
 - [ ] Easier to see the whole photo inside an item or outfit.
 
-## Rename to Gansey *(next, before recruiting testers)*
+## Rename to Gansey *(done)*
 A gansey is the traditional Irish and British fisherman's jumper: made to
 last for decades and mended rather than replaced. Wornwell, Wovenwell and
 Tenue were ruled out (an existing Play app, a pending USPTO filing, and a
@@ -98,22 +98,23 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
 
 - [x] Availability check (2026-11-10): no app on F-Droid or Play, 10 unrelated
   GitHub repos, no USPTO filing. `gansey.app` was unregistered.
-- [ ] App label, Android `applicationId` and `namespace`
-  (`io.github.lismo77.capsulewardrobe`), web manifest and title, about
-  screen, docs and CLAUDE.md.
-- [ ] Dart package name (`capsule_wardrobe`), which touches imports in `lib/`
-  and `test/`.
-- [ ] Rename the GitHub repo (old links redirect). Update `issuesNewUrl` and
-  the GitHub Pages link testers use.
-- [ ] Backup files: write `gansey-backup-...zip`, but keep importing the
+- [x] App label, Android `applicationId` and `namespace` (now
+  `io.github.lismo77.gansey`), web manifest and title, about screen, docs
+  and CLAUDE.md.
+- [x] Dart package name (`gansey`), which touches imports in `lib/` and
+  `test/`.
+- [x] Rename the GitHub repo to `gansey` (old links redirect, except the
+  Pages site). Update `issuesNewUrl` and the GitHub Pages link testers use.
+- [x] Backup files: write `gansey-backup-...zip`, but keep importing the
   old `capward-backup` format.
-- [ ] Leave the on-device database filename alone. It is internal, and
+- [x] Leave the on-device database filename alone. It is internal, and
   renaming it would risk losing existing data.
-- [ ] Record the decision as an ADR.
+- [x] Record the decision as an ADR (0010).
 
 ## Tester readiness *(priority)*
-- [ ] Bug and missing-feature report route for testers, plus a gap check on
-  anything else needed before recruiting testers in forums.
+- [x] Bug and idea report screen: Settings → Help opens a prefilled GitHub
+  issue or email (ganseyapp@gmail.com), or copies the text.
+- [ ] Gap check on anything else needed before recruiting testers in forums.
 
 ## Item details
 - [ ] Sizing: record the size, and flag pieces that may not currently fit.

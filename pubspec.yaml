@@ -1,4 +1,4 @@
-name: capsule_wardrobe
+name: gansey
 description: "A free, open-source capsule wardrobe tracker with an optional, bring-your-own-key AI style coach."
 publish_to: 'none'
 version: 0.5.0+5

@@ -1,6 +1,6 @@
-import 'package:capsule_wardrobe/features/coach/domain/coach_prompt.dart';
-import 'package:capsule_wardrobe/features/style_profile/domain/style_profile.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/coach/domain/coach_prompt.dart';
+import 'package:gansey/features/style_profile/domain/style_profile.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

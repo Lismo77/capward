@@ -1,4 +1,4 @@
-# Capward (working name) - notes for AI coding sessions
+# Gansey (formerly Capward) - notes for AI coding sessions
 
 This project is built mostly by AI pair-programming. Write code directly; keep
 explanations short.

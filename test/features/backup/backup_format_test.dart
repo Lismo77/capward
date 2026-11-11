@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:capsule_wardrobe/features/backup/domain/backup_format.dart';
+import 'package:gansey/features/backup/domain/backup_format.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final jpeg = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3]);
@@ -64,7 +64,7 @@ void main() {
 
   test('files that are not backups are refused', () {
     final notBackup = throwsA(isA<BackupException>()
-        .having((e) => e.message, 'message', contains("isn't a Capward")));
+        .having((e) => e.message, 'message', contains("isn't a Gansey")));
     expect(
         () => decodeBackup(Uint8List.fromList(utf8.encode('hello')),
             currentSchemaVersion: 4),
@@ -77,6 +77,14 @@ void main() {
         () => decodeBackup(zipOf({'manifest.json': '{"format": "other"}'}),
             currentSchemaVersion: 4),
         notBackup);
+  });
+
+  test('backups from before the rename still import', () {
+    final bytes = zipOf({
+      'manifest.json': jsonEncode(
+          {'format': 'capward-backup', 'formatVersion': 1, 'schemaVersion': 4}),
+    });
+    expect(decodeBackup(bytes, currentSchemaVersion: 4), isA<Backup>());
   });
 
   test('damaged table data is reported', () {
@@ -104,6 +112,6 @@ void main() {
 
   test('backupFileName', () {
     expect(
-        backupFileName(DateTime(2026, 1, 9)), 'capward-backup-2026-01-09.zip');
+        backupFileName(DateTime(2026, 1, 9)), 'gansey-backup-2026-01-09.zip');
   });
 }

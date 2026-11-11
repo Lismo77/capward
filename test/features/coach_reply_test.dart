@@ -1,4 +1,4 @@
-import 'package:capsule_wardrobe/features/coach/domain/coach_reply.dart';
+import 'package:gansey/features/coach/domain/coach_reply.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

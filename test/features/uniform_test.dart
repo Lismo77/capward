@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:capsule_wardrobe/features/outfits/domain/outfit.dart';
-import 'package:capsule_wardrobe/features/outfits/domain/uniform.dart';
-import 'package:capsule_wardrobe/features/wardrobe/domain/item.dart';
-import 'package:capsule_wardrobe/features/wear_log/domain/wear_entry.dart';
+import 'package:gansey/features/outfits/domain/outfit.dart';
+import 'package:gansey/features/outfits/domain/uniform.dart';
+import 'package:gansey/features/wardrobe/domain/item.dart';
+import 'package:gansey/features/wear_log/domain/wear_entry.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Item _item(int id, ItemCategory category,

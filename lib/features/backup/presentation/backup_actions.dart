@@ -138,14 +138,14 @@ Future<void> importBackup(BuildContext context) async {
   messenger.showSnackBar(const SnackBar(content: Text('Backup restored')));
 }
 
-/// "Backup from 6 Nov 2026 (Capward 0.2.0): 23 items, 4 outfits, ..."
+/// "Backup from 6 Nov 2026 (Gansey 0.2.0): 23 items, 4 outfits, ..."
 String _describe(Backup b) {
   String n(int count, String one, [String? many]) =>
       '$count ${count == 1 ? one : many ?? '${one}s'}';
   final date = friendlyDate(b.exportedAt, today: DateTime.now());
   final from = [
     'Backup from ${date == 'Today' || date == 'Yesterday' ? date.toLowerCase() : date}',
-    if (b.appVersion != null) '(Capward ${b.appVersion})',
+    if (b.appVersion != null) '(Gansey ${b.appVersion})',
   ].join(' ');
   return '$from: ${[
     n(b.count('items'), 'item'),
