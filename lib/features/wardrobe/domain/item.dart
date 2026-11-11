@@ -8,6 +8,9 @@ enum ItemCategory {
   dress,
   outerwear,
   shoes,
+
+  /// Its own category because only one is worn at a time.
+  hat,
   accessory,
   bag,
   activewear,
@@ -89,6 +92,8 @@ class Item {
   /// 1 (very casual) to 5 (formal).
   final int formality;
   final String? brand;
+
+  /// What the user paid. Null means unknown; 0 means it was free or a gift.
   final int? purchasePriceCents;
   final DateTime? purchaseDate;
   final String? photoPath;
@@ -98,6 +103,9 @@ class Item {
   /// When the item was added to the app. Read from the database only; new
   /// rows get it from the column default.
   final DateTime? createdAt;
+
+  /// Free or a gift: a price of 0, as opposed to no price entered.
+  bool get isFree => purchasePriceCents == 0;
 
   Map<String, Object?> toRow() => {
         'id': id,
@@ -158,6 +166,19 @@ class Item {
   List<Season> get _sortedSeasons =>
       seasons.toList()..sort((a, b) => a.index.compareTo(b.index));
 }
+
+/// What the wardrobe grid shows. Retired items are kept out of the normal
+/// view and shown on their own when [retired] is true. [category] narrows
+/// either view.
+List<Item> wardrobeView(
+  Iterable<Item> items, {
+  ItemCategory? category,
+  bool retired = false,
+}) =>
+    items
+        .where((i) => (i.status == ItemStatus.retired) == retired)
+        .where((i) => category == null || i.category == category)
+        .toList();
 
 /// Rows saved before v2 only have colour names; give those preset swatches.
 List<ItemColor> _readColors(Map<String, Object?> row) {

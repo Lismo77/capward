@@ -16,10 +16,11 @@ class ItemWearStats {
   final DateTime? lastWornOn;
 
   /// Price divided by wears. An unworn item's cost per wear is its full
-  /// price. Null when no price was entered.
+  /// price. Null when no price was entered, or when the item was free or a
+  /// gift (there is nothing to earn back).
   int? get costPerWearCents {
     final price = item.purchasePriceCents;
-    if (price == null) return null;
+    if (price == null || price == 0) return null;
     return timesWorn == 0 ? price : (price / timesWorn).round();
   }
 }
@@ -66,7 +67,7 @@ class WardrobeStats {
   ///   entered wardrobe isn't flagged.
   /// - Least worn: other active items, fewest wears first, skipping any
   ///   already shown as most worn.
-  /// - Cost per wear: owned items with a price, highest first.
+  /// - Cost per wear: owned items with a price above 0, highest first.
   factory WardrobeStats.compute({
     required List<Item> items,
     required List<WearEntry> entries,

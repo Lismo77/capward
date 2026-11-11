@@ -82,8 +82,10 @@ is built on outfits, not as a separate system (ADR 0008). No AI needed.
 
 ## Photos
 - [ ] Background removal, on-device. Needs an open-licensed model (e.g. U²-Net, Apache-2.0) and no Google ML Kit. Expect it to add a few MB to the app.
-- [ ] Rotate item photos in-app. Maybe also auto rotate/crop on upload,
-  possibly as part of the background-removal tool.
+- [x] Rotate item photos in-app (a quarter turn per tap; the image itself is
+  rotated, so backups and the web version get it too).
+- [ ] Maybe auto rotate/crop on upload, possibly as part of the
+  background-removal tool.
 - [ ] Easier to see the whole photo inside an item or outfit.
 
 ## Rename to Gansey *(done)*
@@ -118,9 +120,11 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
 
 ## Item details
 - [ ] Sizing: record the size, and flag pieces that may not currently fit.
-- [ ] Hats as their own category (you can only wear one).
-- [ ] Price paid: blank means unknown, 0 means free or gift.
-- [ ] Retired items hidden from the main dashboard, reachable from another menu.
+- [x] Hats as their own category, with a one-hat slot at the top of outfits.
+  Existing hats filed under Accessory stay there until moved by hand.
+- [x] Price paid: blank means unknown, 0 means free or gift. Gifts have no
+  cost per wear.
+- [x] Retired items hidden from the wardrobe, with their own "Retired" chip.
 - [ ] Colour picker accuracy (reported as imprecise).
 - [ ] Full-screen outfit view with the palette bar on top or bottom.
 

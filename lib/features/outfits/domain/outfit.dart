@@ -97,6 +97,7 @@ Map<int, int> normalizeOptionGroups(
 /// Where an item sits in an outfit, top to bottom. Display order and the
 /// palette bar follow this order.
 enum OutfitSlot {
+  hat('Hat', multi: false),
   outerwear('Outerwear', multi: false),
   top('Tops', multi: true), // layering: shirt + sweater
   dress('Dress', multi: false),
@@ -118,6 +119,7 @@ enum OutfitSlot {
         ItemCategory.dress => OutfitSlot.dress,
         ItemCategory.outerwear => OutfitSlot.outerwear,
         ItemCategory.shoes => OutfitSlot.shoes,
+        ItemCategory.hat => OutfitSlot.hat,
         ItemCategory.bag => OutfitSlot.bag,
         ItemCategory.accessory || ItemCategory.other => OutfitSlot.accessory,
       };
@@ -147,7 +149,7 @@ Set<int> toggleOutfitItem(
   return next;
 }
 
-/// Items sorted top to bottom (outerwear, tops, ... accessories).
+/// Items sorted top to bottom (hat, outerwear, tops, ... accessories).
 List<Item> orderForDisplay(Iterable<Item> items) => items.toList()
   ..sort((a, b) {
     final bySlot = OutfitSlot.forCategory(a.category)
