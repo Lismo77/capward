@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/format.dart';
+import '../../../core/photos/photo_rotation.dart';
 import '../../../core/photos/photo_store.dart';
 import '../../../core/widgets/palette_bar.dart';
 import '../../outfits/data/outfit_repository.dart';
@@ -40,6 +41,11 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
   int _formality = 3;
   ItemStatus _status = ItemStatus.active;
   String? _photoPath;
+
+  /// Photos saved while this screen is open. Only these are safe to delete
+  /// when replaced: the item's original photo stays until the user saves.
+  final Set<String> _newPhotos = {};
+  bool _rotating = false;
   DateTime? _purchaseDate;
   bool _loading = true;
   bool _saving = false;
@@ -62,9 +68,11 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
         _material.text = item.material ?? '';
         _brand.text = item.brand ?? '';
         _notes.text = item.notes ?? '';
-        _price.text = item.purchasePriceCents == null
-            ? ''
-            : (item.purchasePriceCents! / 100).toStringAsFixed(2);
+        _price.text = switch (item.purchasePriceCents) {
+          null => '',
+          0 => '0',
+          final cents => (cents / 100).toStringAsFixed(2),
+        };
         _category = item.category;
         _seasons = {...item.seasons};
         _formality = item.formality;
@@ -91,12 +99,42 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
       imageQuality: 85,
     );
     if (picked == null) return;
-    final path = await ref.read(photoStoreProvider).save(picked);
+    final store = ref.read(photoStoreProvider);
+    final old = _photoPath;
+    final path = await store.save(picked);
+    _newPhotos.add(path);
+    if (old != null && _newPhotos.remove(old)) await store.delete(old);
     if (!mounted) return;
     setState(() => _photoPath = path);
     // Fill in colours automatically the first time; after that the user
     // decides (they may have fixed them by hand).
     if (_colors.isEmpty) await _detectColors(quiet: true);
+  }
+
+  /// Saves a rotated copy of the photo. Rotation repeats until the user
+  /// saves, so intermediate copies made on this screen are deleted.
+  Future<void> _rotatePhoto() async {
+    final old = _photoPath;
+    if (old == null || _rotating) return;
+    setState(() => _rotating = true);
+    final store = ref.read(photoStoreProvider);
+    try {
+      final bytes = await store.read(old);
+      if (bytes == null) throw const FormatException('Photo is missing');
+      final rotated = await rotatePhotoClockwiseInBackground(bytes);
+      final path =
+          await store.saveBytes(rotated.bytes, extension: rotated.extension);
+      _newPhotos.add(path);
+      if (_newPhotos.remove(old)) await store.delete(old);
+      if (mounted) setState(() => _photoPath = path);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Couldn't rotate this photo")));
+      }
+    } finally {
+      if (mounted) setState(() => _rotating = false);
+    }
   }
 
   Future<void> _detectColors({bool quiet = false}) async {
@@ -226,6 +264,8 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
               path: _photoPath,
               onCamera: () => _pickPhoto(ImageSource.camera),
               onGallery: () => _pickPhoto(ImageSource.gallery),
+              onRotate: _photoPath == null ? null : _rotatePhoto,
+              rotating: _rotating,
             ),
             gap,
             if (!_isNew && _status != ItemStatus.wishlist) ...[
@@ -314,14 +354,15 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
                         const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(
                       labelText: 'Price paid',
-                      helperText: 'Used for cost-per-wear',
+                      helperText: 'Blank if unknown, 0 if free or a gift',
+                      helperMaxLines: 2,
                     ),
                     validator: (v) {
                       final text = (v ?? '').trim().replaceAll(',', '.');
                       if (text.isEmpty) return null;
-                      return double.tryParse(text) == null
-                          ? 'Enter a number'
-                          : null;
+                      final value = double.tryParse(text);
+                      if (value == null) return 'Enter a number';
+                      return value < 0 ? 'Enter 0 or more' : null;
                     },
                   ),
                 ),
@@ -387,6 +428,7 @@ class _WearSummary extends ConsumerWidget {
         stats.timesWorn == 1 ? 'Worn once' : 'Worn ${stats.timesWorn} times',
         'last worn ${inlineDate(stats.lastWornOn!, today: DateTime.now())}',
         if (cpw != null) '${formatCents(cpw)} per wear',
+        if (stats.item.isFree) 'free or a gift',
       ].join(' · ');
     }
     return Row(
@@ -408,11 +450,17 @@ class _PhotoPicker extends StatelessWidget {
     required this.path,
     required this.onCamera,
     required this.onGallery,
+    required this.onRotate,
+    required this.rotating,
   });
 
   final String? path;
   final VoidCallback onCamera;
   final VoidCallback onGallery;
+
+  /// Null when there is no photo to rotate.
+  final VoidCallback? onRotate;
+  final bool rotating;
 
   @override
   Widget build(BuildContext context) {
@@ -453,6 +501,18 @@ class _PhotoPicker extends StatelessWidget {
               icon: const Icon(Icons.photo_library_outlined),
               label: const Text('Gallery'),
             ),
+            if (onRotate != null)
+              TextButton.icon(
+                onPressed: rotating ? null : onRotate,
+                icon: rotating
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.rotate_90_degrees_cw_outlined),
+                label: const Text('Rotate'),
+              ),
           ],
         ),
       ],

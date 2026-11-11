@@ -22,6 +22,9 @@ class WardrobeScreen extends ConsumerStatefulWidget {
 class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
   ItemCategory? _filter;
 
+  /// Showing retired items instead of the wardrobe in use.
+  bool _retired = false;
+
   /// Ids of selected items. Selection mode is on while this is non-empty.
   Set<int> _selected = {};
 
@@ -38,9 +41,11 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
 
   void _clearSelection() => setState(() => _selected = {});
 
-  void _setFilter(ItemCategory? filter, List<Item> all) {
+  void _setFilter(ItemCategory? filter, List<Item> all,
+      {bool retired = false}) {
     setState(() {
       _filter = filter;
+      _retired = retired;
       // Never keep hidden items selected - bulk actions should only touch
       // what the user can see.
       final visible = _visible(all).map((i) => i.id).toSet();
@@ -48,8 +53,13 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
     });
   }
 
+  /// The Retired view only applies while something is retired, so the
+  /// screen doesn't get stuck on it after the last item is restored.
+  bool _showingRetired(List<Item> all) =>
+      _retired && all.any((i) => i.status == ItemStatus.retired);
+
   List<Item> _visible(List<Item> all) =>
-      _filter == null ? all : all.where((i) => i.category == _filter).toList();
+      wardrobeView(all, category: _filter, retired: _showingRetired(all));
 
   Future<void> _refresh() async {
     ref.invalidate(itemsProvider);
@@ -150,6 +160,9 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
               );
             }
             final shown = _visible(all);
+            final retired = _showingRetired(all);
+            final inUse = wardrobeView(all);
+            final retiredCount = all.length - inUse.length;
             return Column(
               children: [
                 SizedBox(
@@ -158,39 +171,63 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     children: [
-                      _chip('All (${all.length})', _filter == null,
+                      _chip(
+                          'All (${inUse.length})',
+                          !retired && _filter == null,
                           () => _setFilter(null, all)),
                       for (final c in ItemCategory.values)
-                        if (all.any((i) => i.category == c))
-                          _chip(
-                              c.label, _filter == c, () => _setFilter(c, all)),
+                        if (inUse.any((i) => i.category == c))
+                          _chip(c.label, !retired && _filter == c,
+                              () => _setFilter(c, all)),
+                      // Kept apart from the categories: retired pieces are
+                      // history, not part of the wardrobe in use.
+                      if (retiredCount > 0)
+                        _chip('Retired ($retiredCount)', retired,
+                            () => _setFilter(null, all, retired: true)),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 96),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 200,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
+                if (shown.isEmpty)
+                  Expanded(
+                    child: inUse.isEmpty
+                        ? const EmptyState(
+                            icon: Icons.inventory_2_outlined,
+                            title: 'Everything here is retired',
+                            message: 'Tap Retired to see those pieces, or '
+                                'add something you wear now.',
+                          )
+                        : const EmptyState(
+                            icon: Icons.filter_list_off,
+                            title: 'Nothing left in this category',
+                            message: 'Tap All to see the rest of your '
+                                'wardrobe.',
+                          ),
+                  )
+                else
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 96),
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: shown.length,
+                      itemBuilder: (context, i) {
+                        final item = shown[i];
+                        return _ItemCard(
+                          item: item,
+                          selected: _selected.contains(item.id),
+                          onTap: _selecting
+                              ? () => _toggle(item)
+                              : () => context.push('/wardrobe/${item.id}'),
+                          onLongPress: () => _toggle(item),
+                        );
+                      },
                     ),
-                    itemCount: shown.length,
-                    itemBuilder: (context, i) {
-                      final item = shown[i];
-                      return _ItemCard(
-                        item: item,
-                        selected: _selected.contains(item.id),
-                        onTap: _selecting
-                            ? () => _toggle(item)
-                            : () => context.push('/wardrobe/${item.id}'),
-                        onLongPress: () => _toggle(item),
-                      );
-                    },
                   ),
-                ),
               ],
             );
           },
