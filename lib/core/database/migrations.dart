@@ -10,6 +10,14 @@ const List<List<String>> migrations = [
   _v3,
   _v4,
   _v5,
+  _v6,
+];
+
+/// v6: the Activewear category is gone. It says when you wear something, not
+/// what it is, so it will come back as an occasion tag. Outfits already put
+/// activewear in the Tops slot, so those items become tops.
+const _v6 = <String>[
+  "UPDATE items SET category = 'top' WHERE category = 'activewear'",
 ];
 
 /// v5: uniforms. Items in an outfit that share an `option_group` number are

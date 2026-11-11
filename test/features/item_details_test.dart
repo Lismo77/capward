@@ -18,6 +18,13 @@ Item item(
     );
 
 void main() {
+  test('activewear from old backups reads as a top', () {
+    final row = {'id': 1, 'name': 'Leggings', 'category': 'activewear'};
+    expect(Item.fromRow(row).category, ItemCategory.top);
+    expect(Item.fromRow({...row, 'category': 'nonsense'}).category,
+        ItemCategory.other);
+  });
+
   group('hats', () {
     test('have their own slot, shown first', () {
       expect(OutfitSlot.forCategory(ItemCategory.hat), OutfitSlot.hat);

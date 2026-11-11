@@ -13,7 +13,6 @@ enum ItemCategory {
   hat,
   accessory,
   bag,
-  activewear,
   other;
 
   String get label => _titleCase(name);
@@ -129,8 +128,7 @@ class Item {
     return Item(
       id: row['id'] as int?,
       name: row['name'] as String,
-      category: ItemCategory.values.asNameMap()[row['category']] ??
-          ItemCategory.other,
+      category: _readCategory(row['category']),
       colors: _readColors(row),
       material: row['material'] as String?,
       seasons: _splitList(row['seasons'] as String?)
@@ -179,6 +177,13 @@ List<Item> wardrobeView(
         .where((i) => (i.status == ItemStatus.retired) == retired)
         .where((i) => category == null || i.category == category)
         .toList();
+
+/// Activewear was a category until v6, which made those items tops (where
+/// outfits already put them). Backups made before then still say activewear.
+ItemCategory _readCategory(Object? name) {
+  if (name == 'activewear') return ItemCategory.top;
+  return ItemCategory.values.asNameMap()[name] ?? ItemCategory.other;
+}
 
 /// Rows saved before v2 only have colour names; give those preset swatches.
 List<ItemColor> _readColors(Map<String, Object?> row) {

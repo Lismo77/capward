@@ -137,6 +137,18 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
 - [x] Retired items hidden from the wardrobe, with their own "Retired" chip.
 - [ ] Colour picker accuracy (reported as imprecise).
 - [ ] Full-screen outfit view with the palette bar on top or bottom.
+- [x] Activewear removed as a category (migration v6). It said when you wear
+  something, not what it is, and outfits put every activewear item, leggings
+  included, in the Tops slot. Existing activewear items became tops; check
+  the bottoms by hand.
+- [ ] *Potential:* occasion tags (Work, Casual, Going out, Events, Active,
+  Lounge), multi-select like seasons: no tags means any occasion.
+  - Wardrobe filter by occasion, plus "Hide work-only" for weekend outfits.
+  - Outfit `occasion` picks from the same list instead of free text, and the
+    builder shows matching items first.
+  - Include in backups; the AI coach gets the tags as text.
+  - Later: suggest a tag when an item is only ever logged in, say, Work
+    outfits.
 
 ## Capsules
 - [ ] To be designed. Its placeholder tab was replaced by Stats in 0.2.0 and

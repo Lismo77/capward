@@ -226,4 +226,22 @@ void main() {
     await upgraded.close();
     await dir.delete(recursive: true);
   });
+
+  test('upgrading to v6 turns activewear items into tops', () async {
+    final dir = await Directory.systemTemp.createTemp('gansey_test');
+    final path = '${dir.path}/v5.db';
+    final v5 = await openDatabase(path, version: 5, onCreate: (db, _) async {
+      for (final sql in migrations.take(5).expand((m) => m)) {
+        await db.execute(sql);
+      }
+    });
+    await v5.insert('items', {'name': 'Leggings', 'category': 'activewear'});
+    await v5.close();
+
+    final upgraded = await AppDatabase.open(path: path);
+    final rows = await upgraded.query('items', columns: ['category']);
+    expect(rows.single['category'], 'top');
+    await upgraded.close();
+    await dir.delete(recursive: true);
+  });
 }
