@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/Lismo77/gansey/compare/v0.7.1...v0.7.2) (2026-11-11)
+
+
+### Bug fixes
+
+* steadier keyboard handling and more measurements on iPhone web ([#33](https://github.com/Lismo77/gansey/issues/33)) ([9aa390f](https://github.com/Lismo77/gansey/commit/9aa390f2a0485ca52ca77b93cdd1c7786d799850))
+
 ## [0.7.1](https://github.com/Lismo77/gansey/compare/v0.7.0...v0.7.1) (2026-11-11)
 
 
