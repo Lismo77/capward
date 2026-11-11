@@ -133,6 +133,13 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => _clearAll(context, ref),
             ),
           ],
+          const _Header('Help'),
+          ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: const Text('Report a bug or idea'),
+            subtitle: const Text('Opens a draft for you to review and send'),
+            onTap: () => context.push('/settings/feedback'),
+          ),
           const _Header('About'),
           AboutListTile(
             icon: const Icon(Icons.info_outline),
