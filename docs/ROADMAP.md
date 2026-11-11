@@ -1,6 +1,6 @@
 # Roadmap
 
-Working name: **Capward** (capsule + wardrobe).
+Working name: **Capward** (capsule + wardrobe), being renamed to **Gansey**.
 
 Direction: minimalist and anti-consumption. Help people wear what they own and
 build a consistent "uniform". AI features are hidden when AI is off.
@@ -98,13 +98,18 @@ fit profile, not in the uniform.
   possibly as part of the background-removal tool.
 - [ ] Easier to see the whole photo inside an item or outfit.
 
-## Rename to Wornwell *(next, before recruiting testers)*
+## Rename to Gansey *(next, before recruiting testers)*
+A gansey is the traditional Irish and British fisherman's jumper: made to
+last for decades and mended rather than replaced. Wornwell, Wovenwell and
+Tenue were ruled out (an existing Play app, a pending USPTO filing, and a
+direct AI-stylist competitor).
+
 Do this before the app is posted anywhere. Changing the Android application
 id later makes the new build a separate app, so installed testers would lose
 their data on upgrade. With no outside testers yet, it costs nothing now.
 
-- [ ] Check "Wornwell" isn't taken on F-Droid, Google Play or as a GitHub
-  project, and isn't an obvious trademark clash.
+- [x] Availability check (2026-11-10): no app on F-Droid or Play, 10 unrelated
+  GitHub repos, no USPTO filing. `gansey.app` was unregistered.
 - [ ] App label, Android `applicationId` and `namespace`
   (`io.github.lismo77.capsulewardrobe`), web manifest and title, about
   screen, docs and CLAUDE.md.
@@ -112,7 +117,7 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
   and `test/`.
 - [ ] Rename the GitHub repo (old links redirect). Update `issuesNewUrl` and
   the GitHub Pages link testers use.
-- [ ] Backup files: write `wornwell-backup-...zip`, but keep importing the
+- [ ] Backup files: write `gansey-backup-...zip`, but keep importing the
   old `capward-backup` format.
 - [ ] Leave the on-device database filename alone. It is internal, and
   renaming it would risk losing existing data.
@@ -150,6 +155,6 @@ their data on upgrade. With no outside testers yet, it costs nothing now.
   can't read the old format. Going 9 → 11 directly would lose saved API keys.
 
 ## First public release (1.0)
-- [ ] Final icon (the name is handled in "Rename to Wornwell").
+- [ ] Final icon (the name is handled in "Rename to Gansey").
 - [ ] F-Droid metadata (`fastlane/metadata/android/...`), screenshots, reproducible build
 - [ ] Submit to F-Droid. Expect the "NonFreeNet" anti-feature label because the app can talk to proprietary AI services.
