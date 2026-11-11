@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -59,46 +60,36 @@ class _KeyboardInsetFixState extends ConsumerState<KeyboardInsetFix> {
     if (inset > _lastApplied && inset > engineInset) _revealFocusedField();
     _lastApplied = inset;
 
-    Widget child = widget.child;
-    if (inset != engineInset) {
-      child = MediaQuery(
-        data: media.copyWith(
-          viewInsets: media.viewInsets.copyWith(bottom: inset),
-          // Same as Flutter does itself: the keyboard covers the home bar.
-          padding: media.padding.copyWith(
-            bottom: math.max(0, media.viewPadding.bottom - inset),
-          ),
-        ),
-        child: child,
-      );
-    }
-
-    if (!ref.watch(keyboardDebugProvider)) return child;
+    // The tree keeps the same shape whatever the values, so the app below
+    // is never rebuilt from scratch while the keyboard moves.
     return Stack(
       textDirection: TextDirection.ltr,
       children: [
-        child,
-        Positioned(
-          left: 8,
-          right: 8,
-          top: media.padding.top + 4,
-          child: IgnorePointer(
-            child: _Readout(
-              lines: [
-                'view ${media.size.width.round()}x${media.size.height.round()}'
-                    '  engine inset ${engineInset.round()}'
-                    '  used ${inset.round()}',
-                if (area != null)
-                  'visual top ${area.top.round()} h ${area.height.round()}'
-                      '  scale ${area.scale.toStringAsFixed(2)}',
-                if (area != null)
-                  'inner ${area.innerHeight.round()}'
-                      '  client ${area.clientHeight.round()}'
-                      '  ${area.standalone ? 'home screen' : 'browser tab'}',
-              ],
+        MediaQuery(
+          data: media.copyWith(
+            viewInsets: media.viewInsets.copyWith(bottom: inset),
+            // Same as Flutter does itself: the keyboard covers the home bar.
+            padding: media.padding.copyWith(
+              bottom: math.max(0, media.viewPadding.bottom - inset),
             ),
           ),
+          child: widget.child,
         ),
+        if (ref.watch(keyboardDebugProvider))
+          Positioned(
+            left: 8,
+            right: 8,
+            top: media.padding.top + 4,
+            child: IgnorePointer(
+              child: _Readout(
+                source: _source!,
+                area: area,
+                viewSize: media.size,
+                engineInset: engineInset,
+                usedInset: inset,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -118,13 +109,62 @@ class _KeyboardInsetFixState extends ConsumerState<KeyboardInsetFix> {
   }
 }
 
-class _Readout extends StatelessWidget {
-  const _Readout({required this.lines});
+/// The measurements, refreshed a few times a second because some of them
+/// (page scroll, list scroll, field position) change without an event here.
+class _Readout extends StatefulWidget {
+  const _Readout({
+    required this.source,
+    required this.area,
+    required this.viewSize,
+    required this.engineInset,
+    required this.usedInset,
+  });
 
-  final List<String> lines;
+  final VisibleAreaSource source;
+  final VisibleArea? area;
+  final Size viewSize;
+  final double engineInset;
+  final double usedInset;
+
+  @override
+  State<_Readout> createState() => _ReadoutState();
+}
+
+class _ReadoutState extends State<_Readout> {
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+      widget.source.refresh();
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final area = widget.area;
+    int r(double v) => v.round();
+    final lines = [
+      'view ${r(widget.viewSize.width)}x${r(widget.viewSize.height)}'
+          '  engine inset ${r(widget.engineInset)}'
+          '  used ${r(widget.usedInset)}',
+      if (area != null) ...[
+        'visual top ${r(area.top)} h ${r(area.height)}'
+            '  scale ${area.scale.toStringAsFixed(2)}',
+        'inner ${r(area.innerHeight)}  client ${r(area.clientHeight)}'
+            '  ${area.standalone ? 'home screen' : 'browser tab'}',
+        'page scroll ${r(area.pageScrollY)}  app top ${r(area.viewTop)}',
+      ],
+      ..._focusLines(r),
+    ];
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -145,5 +185,22 @@ class _Readout extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Where the focused field is, and how far its list has scrolled.
+  List<String> _focusLines(int Function(double) r) {
+    final focus = FocusManager.instance.primaryFocus;
+    final context = focus?.context;
+    if (focus == null || context == null || !context.mounted) {
+      return ['no field focused'];
+    }
+    final rect = focus.rect;
+    final position = Scrollable.maybeOf(context)?.position;
+    return [
+      'field top ${r(rect.top)} bottom ${r(rect.bottom)}',
+      if (position != null && position.hasContentDimensions)
+        'list scroll ${r(position.pixels)} of ${r(position.maxScrollExtent)}'
+            '  list h ${r(position.viewportDimension)}',
+    ];
   }
 }

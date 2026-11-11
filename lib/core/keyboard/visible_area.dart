@@ -14,6 +14,8 @@ class VisibleArea {
     required this.innerHeight,
     required this.clientHeight,
     required this.standalone,
+    this.pageScrollY = 0,
+    this.viewTop = 0,
   });
 
   /// `visualViewport.offsetTop`: how far the browser has panned the page up.
@@ -31,10 +33,22 @@ class VisibleArea {
   /// Opened from the home screen rather than in a browser tab.
   final bool standalone;
 
+  /// `window.scrollY`: whether the browser scrolled the page itself.
+  final double pageScrollY;
+
+  /// Where Flutter's `<flutter-view>` element sits on screen. Not 0 means
+  /// the browser moved the whole app.
+  final double viewTop;
+
   double get bottom => top + height;
 }
 
 /// Updates whenever the visible area changes (keyboard, rotation, zoom).
+abstract class VisibleAreaSource implements ValueListenable<VisibleArea?> {
+  /// Measures again now, for values the browser sends no event for.
+  void refresh();
+}
+
 /// Null off the web, where the engine already reports the keyboard properly.
-ValueListenable<VisibleArea?>? createVisibleAreaSource() =>
+VisibleAreaSource? createVisibleAreaSource() =>
     platform.createVisibleAreaSource();
