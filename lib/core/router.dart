@@ -6,6 +6,7 @@ import '../ai/ai_providers.dart';
 import '../features/coach/presentation/coach_screen.dart';
 import '../features/outfits/presentation/outfit_edit_screen.dart';
 import '../features/outfits/presentation/outfits_screen.dart';
+import '../features/feedback/presentation/feedback_screen.dart';
 import '../features/settings/presentation/ai_settings_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/style_profile/presentation/style_profile_screen.dart';
@@ -86,6 +87,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'ai',
                 builder: (context, state) => const AiSettingsScreen(),
+              ),
+              GoRoute(
+                path: 'feedback',
+                builder: (context, state) => const FeedbackScreen(),
               ),
             ],
           ),
