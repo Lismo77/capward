@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/Lismo77/gansey/compare/v0.7.3...v0.8.0) (2026-11-11)
+
+
+### Features
+
+* drop the Activewear category ([#32](https://github.com/Lismo77/gansey/issues/32)) ([660c26e](https://github.com/Lismo77/gansey/commit/660c26eb04902c0ad6c3c867ee21c8b775d3afa2))
+
 ## [0.7.3](https://github.com/Lismo77/gansey/compare/v0.7.2...v0.7.3) (2026-11-11)
 
 
