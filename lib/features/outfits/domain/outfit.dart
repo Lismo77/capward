@@ -114,7 +114,7 @@ enum OutfitSlot {
   final bool multi;
 
   static OutfitSlot forCategory(ItemCategory category) => switch (category) {
-        ItemCategory.top || ItemCategory.activewear => OutfitSlot.top,
+        ItemCategory.top => OutfitSlot.top,
         ItemCategory.bottom => OutfitSlot.bottom,
         ItemCategory.dress => OutfitSlot.dress,
         ItemCategory.outerwear => OutfitSlot.outerwear,
