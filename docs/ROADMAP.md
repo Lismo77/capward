@@ -1,6 +1,6 @@
 # Roadmap
 
-Working name: **Capward** (capsule + wardrobe).
+Working name: **Capward** (capsule + wardrobe), being renamed to **Gansey**.
 
 Direction: minimalist and anti-consumption. Help people wear what they own and
 build a consistent "uniform". AI features are hidden when AI is off.
@@ -63,8 +63,65 @@ is built on outfits, not as a separate system (ADR 0008). No AI needed.
 - [ ] "Fill in from photo": the AI suggests category, colours, material and seasons
 - [ ] Gap analysis and purchase check ("does this fit my capsule or uniform, or duplicate something?")
 
+## AI coach photos and threads *(priority, tester feedback)*
+- [ ] Grow the AI settings screen (`/settings/ai`, provider setup only today)
+  into the home for all AI options: move the on/off switch there from the
+  main Settings screen, and add room for more later (photos, body details,
+  model choices).
+- [ ] Photo sharing setting: a separate "Let the AI see photos" switch in AI
+  settings, off by default, hidden controls when off (ADR 0009).
+- [ ] Attach photos in coach chat, per message. Two uses: a piece you're
+  thinking of buying (does it fit the wardrobe, is the price and quality
+  good), and you wearing an item (fit, body type, colouring).
+- [ ] Saveable coach threads: continue a styling session later. Photos in a
+  thread are stored locally with it so it stays readable.
+- [ ] Archive thread: when archiving, delete the thread's photos or keep
+  downscaled copies, to save space.
+- [ ] Coach asks clarifying questions before building an outfit (e.g. the
+  dress code for a wedding).
+
 ## Photos
 - [ ] Background removal, on-device. Needs an open-licensed model (e.g. U²-Net, Apache-2.0) and no Google ML Kit. Expect it to add a few MB to the app.
+- [ ] Rotate item photos in-app. Maybe also auto rotate/crop on upload,
+  possibly as part of the background-removal tool.
+- [ ] Easier to see the whole photo inside an item or outfit.
+
+## Rename to Gansey *(next, before recruiting testers)*
+A gansey is the traditional Irish and British fisherman's jumper: made to
+last for decades and mended rather than replaced. Wornwell, Wovenwell and
+Tenue were ruled out (an existing Play app, a pending USPTO filing, and a
+direct AI-stylist competitor).
+
+Do this before the app is posted anywhere. Changing the Android application
+id later makes the new build a separate app, so installed testers would lose
+their data on upgrade. With no outside testers yet, it costs nothing now.
+
+- [x] Availability check (2026-11-10): no app on F-Droid or Play, 10 unrelated
+  GitHub repos, no USPTO filing. `gansey.app` was unregistered.
+- [ ] App label, Android `applicationId` and `namespace`
+  (`io.github.lismo77.capsulewardrobe`), web manifest and title, about
+  screen, docs and CLAUDE.md.
+- [ ] Dart package name (`capsule_wardrobe`), which touches imports in `lib/`
+  and `test/`.
+- [ ] Rename the GitHub repo (old links redirect). Update `issuesNewUrl` and
+  the GitHub Pages link testers use.
+- [ ] Backup files: write `gansey-backup-...zip`, but keep importing the
+  old `capward-backup` format.
+- [ ] Leave the on-device database filename alone. It is internal, and
+  renaming it would risk losing existing data.
+- [ ] Record the decision as an ADR.
+
+## Tester readiness *(priority)*
+- [ ] Bug and missing-feature report route for testers, plus a gap check on
+  anything else needed before recruiting testers in forums.
+
+## Item details
+- [ ] Sizing: record the size, and flag pieces that may not currently fit.
+- [ ] Hats as their own category (you can only wear one).
+- [ ] Price paid: blank means unknown, 0 means free or gift.
+- [ ] Retired items hidden from the main dashboard, reachable from another menu.
+- [ ] Colour picker accuracy (reported as imprecise).
+- [ ] Full-screen outfit view with the palette bar on top or bottom.
 
 ## Capsules
 - [ ] To be designed. Its placeholder tab was replaced by Stats in 0.2.0 and
@@ -90,6 +147,6 @@ is built on outfits, not as a separate system (ADR 0008). No AI needed.
   can't read the old format. Going 9 → 11 directly would lose saved API keys.
 
 ## First public release (1.0)
-- [ ] Final name and icon. Check that "Capward" isn't taken on F-Droid or Play before committing to it.
+- [ ] Final icon (the name is handled in "Rename to Gansey").
 - [ ] F-Droid metadata (`fastlane/metadata/android/...`), screenshots, reproducible build
 - [ ] Submit to F-Droid. Expect the "NonFreeNet" anti-feature label because the app can talk to proprietary AI services.
