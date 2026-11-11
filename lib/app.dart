@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/keyboard/keyboard_inset_fix.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 
@@ -16,8 +15,6 @@ class CapsuleApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       routerConfig: router,
-      builder: (context, child) =>
-          KeyboardInsetFix(child: child ?? const SizedBox.shrink()),
     );
   }
 }
