@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/Lismo77/capward/compare/v0.5.0...v0.6.0) (2026-11-11)
+
+
+### Features
+
+* report a bug or idea from Settings ([#18](https://github.com/Lismo77/capward/issues/18)) ([1ac0cf0](https://github.com/Lismo77/capward/commit/1ac0cf0ff3838b7107279b8d103d5dd966467b2a))
+
 ## [0.5.0](https://github.com/Lismo77/capward/compare/v0.4.0...v0.5.0) (2026-11-09)
 
 

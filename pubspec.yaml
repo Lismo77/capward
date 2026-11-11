@@ -1,7 +1,7 @@
 name: capsule_wardrobe
 description: "A free, open-source capsule wardrobe tracker with an optional, bring-your-own-key AI style coach."
 publish_to: 'none'
-version: 0.5.0+5
+version: 0.6.0+6
 
 environment:
   sdk: ^3.5.0
