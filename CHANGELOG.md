@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/Lismo77/gansey/compare/v0.7.0...v0.7.1) (2026-11-11)
+
+
+### Bug fixes
+
+* keep text boxes above the keyboard in the iPhone web app ([#30](https://github.com/Lismo77/gansey/issues/30)) ([3f7f097](https://github.com/Lismo77/gansey/commit/3f7f097d95edcc2df2d5e5484555b8d3767a22f7))
+
 ## [0.7.0](https://github.com/Lismo77/gansey/compare/v0.6.0...v0.7.0) (2026-11-11)
 
 
