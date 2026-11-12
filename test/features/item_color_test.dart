@@ -26,6 +26,12 @@ Uint8List _image(int w, int h, int background,
 
 void main() {
   group('ItemColor', () {
+    test('label is sentence case; name stays lowercase', () {
+      final c = ItemColor.named('light grey');
+      expect(c.label, 'Light grey');
+      expect(c.name, 'light grey');
+    });
+
     test('named presets are case-insensitive; unknown names get grey', () {
       expect(ItemColor.named('Navy').value, 0x1F2A44);
       final odd = ItemColor.named('chartreuse-ish');
@@ -88,6 +94,35 @@ void main() {
     test('ignores transparent pixels', () {
       final px = Uint8List(10 * 10 * 4); // all zero: transparent
       expect(dominantColors(px, 10, 10), isEmpty);
+    });
+  });
+
+  group('applyColorSelection', () {
+    final photoOlive = ItemColor.fromValue(0x707060); // greyish, named olive
+
+    test('keeps a photo shade whose name stays selected', () {
+      expect(photoOlive.name, 'olive');
+      final result = applyColorSelection([photoOlive], ['olive']);
+      expect(result, [photoOlive]);
+    });
+
+    test('adds new names as presets, in pick order', () {
+      final result =
+          applyColorSelection([photoOlive], ['olive', 'navy', 'cream']);
+      expect(result.map((c) => c.name), ['olive', 'navy', 'cream']);
+      expect(result[1], ItemColor.named('navy'));
+    });
+
+    test('drops colours whose name was unselected', () {
+      final result =
+          applyColorSelection([ItemColor.named('navy'), photoOlive], ['navy']);
+      expect(result, [ItemColor.named('navy')]);
+    });
+
+    test('collapses existing duplicates of the same name', () {
+      final result = applyColorSelection(
+          [photoOlive, ItemColor.named('olive')], ['olive']);
+      expect(result, [photoOlive]);
     });
   });
 }

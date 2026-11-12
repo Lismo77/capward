@@ -302,6 +302,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
             ),
             gap,
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               controller: _material,
               decoration: const InputDecoration(
                 labelText: 'Material',
@@ -340,6 +341,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
               onChanged: (v) => setState(() => _formality = v.round()),
             ),
             TextFormField(
+              textCapitalization: TextCapitalization.words,
               controller: _brand,
               decoration: const InputDecoration(labelText: 'Brand'),
             ),
@@ -391,6 +393,7 @@ class _ItemEditScreenState extends ConsumerState<ItemEditScreen> {
             ),
             gap,
             TextFormField(
+              textCapitalization: TextCapitalization.sentences,
               controller: _notes,
               decoration: const InputDecoration(
                 labelText: 'Notes',
@@ -535,11 +538,10 @@ class _ColorsEditor extends StatelessWidget {
   final VoidCallback? onDetect;
   final bool detecting;
 
-  Future<void> _add(BuildContext context) async {
-    final picked = await showColorPickerSheet(context);
-    if (picked != null && !colors.contains(picked)) {
-      onChanged([...colors, picked]);
-    }
+  Future<void> _pick(BuildContext context) async {
+    final picked = await showColorPickerSheet(context,
+        selected: [for (final c in colors) c.name]);
+    if (picked != null) onChanged(applyColorSelection(colors, picked));
   }
 
   @override
@@ -556,13 +558,14 @@ class _ColorsEditor extends StatelessWidget {
             for (final c in colors)
               InputChip(
                 avatar: ColorDot(color: c.value),
-                label: Text(c.name),
+                label: Text(c.label),
                 onDeleted: () => onChanged([...colors]..remove(c)),
               ),
             ActionChip(
-              avatar: const Icon(Icons.add, size: 18),
-              label: const Text('Add colour'),
-              onPressed: () => _add(context),
+              avatar: Icon(colors.isEmpty ? Icons.add : Icons.edit_outlined,
+                  size: 18),
+              label: Text(colors.isEmpty ? 'Add colours' : 'Edit colours'),
+              onPressed: () => _pick(context),
             ),
             if (onDetect != null)
               ActionChip(

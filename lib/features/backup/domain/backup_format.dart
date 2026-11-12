@@ -177,3 +177,16 @@ String backupFileName(DateTime now) {
   String two(int n) => n.toString().padLeft(2, '0');
   return 'gansey-backup-${now.year}-${two(now.month)}-${two(now.day)}.zip';
 }
+
+/// Brings a row from a backup made at [fromSchemaVersion] in line with what
+/// later migrations did to the live database, since restore inserts rows
+/// as they are.
+BackupRow upgradeBackupRow(String table, BackupRow row, int fromSchemaVersion) {
+  // v7 replaced photo-detected colour shades with standard swatches.
+  if (table == 'items' &&
+      fromSchemaVersion < 7 &&
+      row.containsKey('swatches')) {
+    return {...row, 'swatches': '[]'};
+  }
+  return row;
+}

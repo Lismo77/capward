@@ -66,7 +66,8 @@ class BackupService {
         }
         for (final table in backupTables) {
           final columns = await _columns(txn, table);
-          for (final row in backup.tables[table] ?? const <BackupRow>[]) {
+          for (final raw in backup.tables[table] ?? const <BackupRow>[]) {
+            final row = upgradeBackupRow(table, raw, backup.schemaVersion);
             final values = {
               for (final MapEntry(:key, :value) in row.entries)
                 if (columns.contains(key)) key: value,
