@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/Lismo77/gansey/compare/v0.8.1...v0.8.2) (2026-11-12)
+
+
+### Bug fixes
+
+* tester polish for pop-ups, capitalisation and colours ([#55](https://github.com/Lismo77/gansey/issues/55)) ([a0c6eea](https://github.com/Lismo77/gansey/commit/a0c6eea9b7ad355842f4db4dbc7e726d3b4c3269))
+
 ## [0.8.1](https://github.com/Lismo77/gansey/compare/v0.8.0...v0.8.1) (2026-11-11)
 
 
