@@ -104,9 +104,34 @@ loses their data. Anything that serves that is in; everything else waits for
 - [ ] Search in the wardrobe, including while building an outfit (#26).
 - [ ] Log a wear for an earlier day.
 - [ ] Full-screen photo view for items and outfits.
-- [ ] Decide #29: whether outfits logged from single pieces should be kept
-  off the Outfits page. Settle it before 1.0 rather than change the routine
-  after.
+- [ ] Tap a piece in an outfit to open that item (#47).
+- [ ] Two outerwear layers in an outfit, e.g. a jacket under a coat (#43).
+  A coat is still outerwear, so no new category: the outfit takes a second
+  outerwear piece rather than one layer slot. Easier to change the outfit
+  model before there are public users.
+
+### Today's wear and ad-hoc outfits
+Decided (#29, 2026-11-12): wears logged from single pieces are kept **off**
+the Outfits page, so it stays for deliberate outfits and uniforms. Ad-hoc
+wears are still first-class for the day they're worn.
+- [ ] The today bar shows the current wear whether or not it came from a
+  saved outfit (#48: entries without an `outfit_id` are skipped today).
+- [ ] Tapping the today bar opens a view of today's wear with **Add item**
+  and **Remove item**, so the outfit can change as the day goes on (e.g.
+  the jacket comes off) (#50). It edits the logged wear, not a saved outfit.
+- [ ] Ad-hoc wears in the wear history can be expanded to show their
+  pieces (#47).
+- [ ] Not planned: counting an item only after it's been worn for a set
+  time (#50). Revisit if testers ask.
+
+### Polish (tester reports, iPhone web app)
+- [ ] Consistent capitalisation: colour names show in lowercase while
+  categories and seasons are title case. Show them all in title case (#52).
+- [ ] Auto-capitalise text fields. Only 4 of 14 set `textCapitalization`;
+  the iPhone keyboard follows that setting, so most fields start in
+  lowercase (#53).
+- [ ] Colour picker: pick several colours in one go, instead of the sheet
+  closing after each one (#54).
 
 ### Occasion tags
 Brings back "Active" after Activewear stopped being a category (migration v6).
@@ -163,8 +188,14 @@ headline.
 - [ ] Coach asks clarifying questions before building an outfit (e.g. the
   dress code for a wedding).
 
+### Your data
+- [ ] Export the wardrobe as CSV (#44), for spreadsheets, budgets, or
+  leaving the app. Early 1.x; the .zip backup already covers data safety.
+
 ### Item details
 - [ ] Sizing: record the size, and flag pieces that may not currently fit.
+- [ ] Condition: new, good, worn, needs mending (#46). Fits "mended rather
+  than replaced"; a "needs mending" filter could follow.
 - [x] Hats as their own category, with a one-hat slot at the top of outfits.
   Existing hats filed under Accessory stay there until moved by hand.
 - [x] Price paid: blank means unknown, 0 means free or gift. Gifts have no
@@ -217,6 +248,11 @@ headline.
   "No, I wore something else" lets the user pick the outfit they wore
 - [ ] Events with dress codes. The AI assigns an existing outfit, or builds one, to fit the dress code.
 - [ ] Optional sync through a folder the user controls (Syncthing, Nextcloud, WebDAV)
+
+### Benched
+Not planned; kept here so the reasoning isn't lost.
+- Favourite items (#45). Unclear it fits an anti-consumption app. If the goal
+  is surfacing under-worn pieces, a "least worn first" sort does that better.
 
 ### Maintenance
 - [x] `flutter_secure_storage` 10, `file_picker` 13, `package_info_plus` 10.
