@@ -126,12 +126,12 @@ wears are still first-class for the day they're worn.
 
 ### Polish (tester reports, iPhone web app)
 - [ ] Consistent capitalisation: colour names show in lowercase while
-  categories and seasons are title case. Show them all in title case.
+  categories and seasons are title case. Show them all in title case (#52).
 - [ ] Auto-capitalise text fields. Only 4 of 14 set `textCapitalization`;
   the iPhone keyboard follows that setting, so most fields start in
-  lowercase.
+  lowercase (#53).
 - [ ] Colour picker: pick several colours in one go, instead of the sheet
-  closing after each one.
+  closing after each one (#54).
 
 ### Occasion tags
 Brings back "Active" after Activewear stopped being a category (migration v6).
