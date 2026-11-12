@@ -11,6 +11,16 @@ const List<List<String>> migrations = [
   _v4,
   _v5,
   _v6,
+  _v7,
+];
+
+/// v7: colours detected from a photo used to keep the photo's exact shade,
+/// which is often off (lighting, camera). Colours now always use the
+/// standard swatch for their name; clearing `swatches` makes items fall back
+/// to the presets for their `colors` names. No item had a hand-picked
+/// custom shade before this, so nothing chosen by the user is lost.
+const _v7 = <String>[
+  "UPDATE items SET swatches = '[]'",
 ];
 
 /// v6: the Activewear category is gone. It says when you wear something, not

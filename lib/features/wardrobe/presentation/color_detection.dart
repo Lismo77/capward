@@ -17,7 +17,9 @@ Future<List<ItemColor>> detectItemColors(Uint8List bytes) async {
         data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     final found = <String, ItemColor>{};
     for (final rgb in dominantColors(pixels, image.width, image.height)) {
-      final color = ItemColor.fromValue(rgb);
+      // The standard swatch, not the photo's shade: lighting and cameras
+      // often get the shade wrong, and a picked colour should look the same.
+      final color = nearestPreset(rgb);
       found.putIfAbsent(color.name, () => color); // one swatch per name
     }
     return found.values.toList();

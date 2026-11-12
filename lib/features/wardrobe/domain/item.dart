@@ -185,11 +185,15 @@ ItemCategory _readCategory(Object? name) {
   return ItemCategory.values.asNameMap()[name] ?? ItemCategory.other;
 }
 
-/// Rows saved before v2 only have colour names; give those preset swatches.
+/// Rows saved before v2, and every row since v7 cleared photo shades, may
+/// only have colour names; give those preset swatches.
 List<ItemColor> _readColors(Map<String, Object?> row) {
   final swatches = ItemColor.decodeList(row['swatches'] as String?);
   if (swatches.isNotEmpty) return swatches;
-  return _splitList(row['colors'] as String?).map(ItemColor.named).toList();
+  return _splitList(row['colors'] as String?)
+      .toSet() // a photo shade and a pick could share a name before v7
+      .map(ItemColor.named)
+      .toList();
 }
 
 List<String> _splitList(String? value) => (value ?? '')

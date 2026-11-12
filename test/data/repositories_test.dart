@@ -244,4 +244,29 @@ void main() {
     await upgraded.close();
     await dir.delete(recursive: true);
   });
+
+  test('upgrading to v7 swaps photo shades for standard swatches', () async {
+    final dir = await Directory.systemTemp.createTemp('gansey_test');
+    final path = '${dir.path}/v6.db';
+    final v6 = await openDatabase(path, version: 6, onCreate: (db, _) async {
+      for (final sql in migrations.take(6).expand((m) => m)) {
+        await db.execute(sql);
+      }
+    });
+    await v6.insert('items', {
+      'name': 'Field jacket',
+      'category': 'outerwear',
+      'colors': 'olive,olive,cream',
+      'swatches': '[{"name":"olive","hex":"#707060"},'
+          '{"name":"olive","hex":"#6B6B3A"},'
+          '{"name":"cream","hex":"#F3E9D2"}]',
+    });
+    await v6.close();
+
+    final upgraded = await AppDatabase.open(path: path);
+    final jacket = (await ItemRepository(upgraded).all()).single;
+    expect(jacket.colors, [ItemColor.named('olive'), ItemColor.named('cream')]);
+    await upgraded.close();
+    await dir.delete(recursive: true);
+  });
 }

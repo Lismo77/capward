@@ -114,4 +114,21 @@ void main() {
     expect(
         backupFileName(DateTime(2026, 1, 9)), 'gansey-backup-2026-01-09.zip');
   });
+
+  group('upgradeBackupRow', () {
+    const photoShade = '[{"name":"olive","hex":"#707060"}]';
+    final item = {'id': 1, 'colors': 'olive', 'swatches': photoShade};
+
+    test('clears photo shades from backups made before v7', () {
+      expect(upgradeBackupRow('items', item, 6)['swatches'], '[]');
+      expect(upgradeBackupRow('items', item, 6)['colors'], 'olive');
+    });
+
+    test('leaves newer backups, other tables and old rows alone', () {
+      expect(upgradeBackupRow('items', item, 7), item);
+      expect(upgradeBackupRow('outfits', item, 6), item);
+      final v1 = {'id': 1, 'colors': 'navy'};
+      expect(upgradeBackupRow('items', v1, 1), v1);
+    });
+  });
 }
