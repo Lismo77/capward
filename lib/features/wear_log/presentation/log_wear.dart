@@ -119,7 +119,7 @@ Future<_LogChoice?> _askAddOrNew(BuildContext context, int count) {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Already wearing something today'),
-      content: Text('Add $pieces to today's outfit, or did you change '
+      content: Text("Add $pieces to today's outfit, or did you change "
           'into a new outfit?'),
       actions: [
         TextButton(
