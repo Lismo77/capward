@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/Lismo77/gansey/compare/v0.8.2...v0.9.0) (2026-11-12)
+
+
+### Features
+
+* edit today's wear from the today bar ([#57](https://github.com/Lismo77/gansey/issues/57)) ([a2233a4](https://github.com/Lismo77/gansey/commit/a2233a4e2174384b44a122c0e19b161c0ef557b2))
+
 ## [0.8.2](https://github.com/Lismo77/gansey/compare/v0.8.1...v0.8.2) (2026-11-12)
 
 
