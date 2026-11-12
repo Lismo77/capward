@@ -258,6 +258,7 @@ class _OutfitEditScreenState extends ConsumerState<OutfitEditScreen> {
           ),
           const SizedBox(height: 12),
           TextField(
+            textCapitalization: TextCapitalization.sentences,
             controller: _occasion,
             decoration: const InputDecoration(
               labelText: 'Occasion (optional)',

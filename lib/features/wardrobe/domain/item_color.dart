@@ -27,6 +27,11 @@ class ItemColor {
 
   String get hex => '#${value.toRadixString(16).padLeft(6, '0').toUpperCase()}';
 
+  /// For display, in the same case as category and season labels
+  /// ("Light grey"). [name] stays lowercase for storage, search and the AI.
+  String get label =>
+      name.isEmpty ? name : name[0].toUpperCase() + name.substring(1);
+
   Map<String, String> toJson() => {'name': name, 'hex': hex};
 
   static ItemColor? fromJson(Object? json) {
@@ -128,4 +133,22 @@ double colorDistance(int a, int b) {
   return math.sqrt((2 + rMean / 256) * dr * dr +
       4 * dg * dg +
       (2 + (255 - rMean) / 256) * db * db);
+}
+
+/// The item's colours after picking [selectedNames] in the colour sheet.
+///
+/// Colours are matched by name, so an exact shade from a photo is kept when
+/// its name stays selected, rather than a second colour of the same name
+/// being added. Newly selected names are added as presets, in pick order.
+List<ItemColor> applyColorSelection(
+    List<ItemColor> current, List<String> selectedNames) {
+  final selected = selectedNames.toSet();
+  final byName = <String, ItemColor>{};
+  for (final c in current) {
+    if (selected.contains(c.name)) byName.putIfAbsent(c.name, () => c);
+  }
+  for (final name in selectedNames) {
+    byName.putIfAbsent(name, () => ItemColor.named(name));
+  }
+  return byName.values.toList();
 }

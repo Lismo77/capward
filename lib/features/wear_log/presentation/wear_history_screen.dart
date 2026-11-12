@@ -34,6 +34,8 @@ class _WearHistoryScreenState extends ConsumerState<WearHistoryScreen> {
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(SnackBar(
       content: const Text('Entry deleted'),
+      // With an action, a snack bar stays until dismissed unless told not to.
+      persist: false,
       action: SnackBarAction(
         label: 'Undo',
         onPressed: () async {

@@ -85,6 +85,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         content: Text(message),
+        // With an action, a snack bar stays until dismissed unless told not to.
+        persist: false,
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
@@ -141,6 +143,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           ),
           const SizedBox(height: 16),
           TextField(
+            textCapitalization: TextCapitalization.sentences,
             controller: _title,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
@@ -150,6 +153,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           ),
           const SizedBox(height: 16),
           TextField(
+            textCapitalization: TextCapitalization.sentences,
             controller: _details,
             minLines: 5,
             maxLines: 12,
