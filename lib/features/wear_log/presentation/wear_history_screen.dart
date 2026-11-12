@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/format.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -8,6 +9,7 @@ import '../../outfits/domain/outfit.dart';
 import '../../outfits/presentation/widgets/outfit_collage.dart';
 import '../../wardrobe/data/item_repository.dart';
 import '../../wardrobe/domain/item.dart';
+import '../../wardrobe/presentation/widgets/item_thumbnail.dart';
 import '../data/wear_log_repository.dart';
 import '../domain/wear_entry.dart';
 
@@ -77,7 +79,7 @@ class _WearHistoryScreenState extends ConsumerState<WearHistoryScreen> {
             if (e.wornOn != day) rows.add(day = e.wornOn);
             rows.add(e);
           }
-          final currentId = ref.watch(currentOutfitWearProvider)?.id;
+          final currentId = ref.watch(currentWearProvider)?.id;
           final localizations = MaterialLocalizations.of(context);
           final use24h = MediaQuery.alwaysUse24HourFormatOf(context);
           final theme = Theme.of(context);
@@ -126,7 +128,10 @@ class _WearHistoryScreenState extends ConsumerState<WearHistoryScreen> {
                   child: const Icon(Icons.delete_outline),
                 ),
                 onDismissed: (_) => _delete(entry),
-                child: ListTile(
+                // Tap to see the pieces; each opens its item.
+                child: ExpansionTile(
+                  shape: const Border(),
+                  collapsedShape: const Border(),
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: SizedBox.square(
@@ -144,6 +149,24 @@ class _WearHistoryScreenState extends ConsumerState<WearHistoryScreen> {
                           visualDensity: VisualDensity.compact,
                         )
                       : null,
+                  children: [
+                    for (final item in pieces)
+                      ListTile(
+                        dense: true,
+                        contentPadding:
+                            const EdgeInsets.only(left: 32, right: 16),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: SizedBox.square(
+                            dimension: 36,
+                            child: ItemThumbnail(item: item, iconSize: 16),
+                          ),
+                        ),
+                        title: Text(item.name),
+                        subtitle: Text(item.category.label),
+                        onTap: () => context.push('/wardrobe/${item.id}'),
+                      ),
+                  ],
                 ),
               );
             },
