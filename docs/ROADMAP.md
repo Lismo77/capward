@@ -114,13 +114,13 @@ loses their data. Anything that serves that is in; everything else waits for
 Decided (#29, 2026-11-12): wears logged from single pieces are kept **off**
 the Outfits page, so it stays for deliberate outfits and uniforms. Ad-hoc
 wears are still first-class for the day they're worn.
-- [ ] The today bar shows the current wear whether or not it came from a
+- [x] The today bar shows the current wear whether or not it came from a
   saved outfit (#48: entries without an `outfit_id` are skipped today).
-- [ ] Tapping the today bar opens a view of today's wear with **Add item**
+- [x] Tapping the today bar opens a view of today's wear with **Add item**
   and **Remove item**, so the outfit can change as the day goes on (e.g.
   the jacket comes off) (#50). It edits the logged wear, not a saved outfit.
-- [ ] Ad-hoc wears in the wear history can be expanded to show their
-  pieces (#47).
+- [x] Entries in the wear history (ad-hoc or not) can be expanded to show
+  their pieces, each opening its item (#47).
 - [ ] Not planned: counting an item only after it's been worn for a set
   time (#50). Revisit if testers ask.
 

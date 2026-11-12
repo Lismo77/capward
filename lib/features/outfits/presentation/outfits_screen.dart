@@ -22,7 +22,7 @@ class OutfitsScreen extends ConsumerWidget {
     final items = ref.watch(itemsProvider).valueOrNull ?? const <Item>[];
     final byId = {for (final i in items) i.id!: i};
     final wears = ref.watch(wearLogProvider).valueOrNull ?? const [];
-    final wearingId = ref.watch(currentOutfitWearProvider)?.outfitId;
+    final wearingId = ref.watch(currentWearProvider)?.outfitId;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Outfits')),

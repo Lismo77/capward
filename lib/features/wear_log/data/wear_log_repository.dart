@@ -42,6 +42,33 @@ class WearLogRepository {
   Future<void> delete(int id) async {
     await _db.delete('wear_log', where: 'id = ?', whereArgs: [id]);
   }
+
+  /// Adds pieces to an existing entry ("add to today's outfit"). Pieces
+  /// already in it are ignored.
+  Future<void> addItems(int wearId, Iterable<int> itemIds) =>
+      _db.transaction((txn) async {
+        for (final itemId in itemIds.toSet()) {
+          await txn.insert(
+              'wear_log_items', {'wear_id': wearId, 'item_id': itemId},
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+      });
+
+  /// Takes a piece out of an entry: it wasn't worn after all. Removing the
+  /// last piece deletes the entry. Returns true if the entry was deleted.
+  Future<bool> removeItem(int wearId, int itemId) =>
+      _db.transaction((txn) async {
+        await txn.delete('wear_log_items',
+            where: 'wear_id = ? AND item_id = ?', whereArgs: [wearId, itemId]);
+        final left = await txn.query('wear_log_items',
+            columns: ['item_id'],
+            where: 'wear_id = ?',
+            whereArgs: [wearId],
+            limit: 1);
+        if (left.isNotEmpty) return false;
+        await txn.delete('wear_log', where: 'id = ?', whereArgs: [wearId]);
+        return true;
+      });
 }
 
 final wearLogRepositoryProvider =
@@ -55,10 +82,10 @@ final wearLogProvider = FutureProvider<List<WearEntry>>((ref) async {
   return repo.all();
 });
 
-/// The outfit being worn right now (see [currentOutfitWear]), or null.
-final currentOutfitWearProvider = Provider<WearEntry?>((ref) {
+/// What's being worn right now (see [currentWear]), or null.
+final currentWearProvider = Provider<WearEntry?>((ref) {
   final entries = ref.watch(wearLogProvider).valueOrNull;
-  return entries == null ? null : currentOutfitWear(entries, DateTime.now());
+  return entries == null ? null : currentWear(entries, DateTime.now());
 });
 
 final wardrobeStatsProvider = FutureProvider<WardrobeStats>((ref) async {

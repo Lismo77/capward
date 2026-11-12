@@ -202,6 +202,24 @@ void main() {
     expect(all.map((w) => w.wornAt), [evening, morning, null]);
   });
 
+  test('pieces can be added to and removed from a wear', () async {
+    final tee = await addItem('Tee', ItemCategory.top);
+    final jeans = await addItem('Jeans', ItemCategory.bottom);
+    final jacket = await addItem('Jacket', ItemCategory.outerwear);
+    final id = await wears.log(WearEntry.now(itemIds: [tee, jeans]));
+
+    await wears.addItems(id, [jeans, jacket]); // jeans already there
+    expect((await wears.all()).single.itemIds..sort(), [tee, jeans, jacket]);
+
+    expect(await wears.removeItem(id, jacket), isFalse);
+    expect(await wears.removeItem(id, tee), isFalse);
+    expect((await wears.all()).single.itemIds, [jeans]);
+
+    expect(await wears.removeItem(id, jeans), isTrue);
+    expect(await wears.all(), isEmpty);
+    expect(await db.query('wear_log'), isEmpty);
+  });
+
   test('items read their created_at', () async {
     final id = await addItem('Tee', ItemCategory.top);
     expect((await items.byId(id))!.createdAt, isNotNull);

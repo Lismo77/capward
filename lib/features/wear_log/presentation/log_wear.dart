@@ -22,7 +22,7 @@ Future<void> wearOutfit(
   final container = ProviderScope.containerOf(context, listen: false);
   final now = DateTime.now();
   final entries = await container.read(wearLogProvider.future);
-  if (currentOutfitWear(entries, now)?.outfitId == outfitId) return;
+  if (currentWear(entries, now)?.outfitId == outfitId) return;
   final repo = await container.read(wearLogRepositoryProvider.future);
   await repo.log(WearEntry.now(outfitId: outfitId, itemIds: itemIds, now: now));
   container.invalidate(wearLogProvider);
@@ -30,10 +30,10 @@ Future<void> wearOutfit(
 
 /// Undoes [wearOutfit] for today's current outfit: removes that entry, so
 /// whatever was worn before it becomes current again.
-Future<void> stopWearingOutfit(BuildContext context) async {
+Future<void> removeTodaysWear(BuildContext context) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final entries = await container.read(wearLogProvider.future);
-  final current = currentOutfitWear(entries, DateTime.now());
+  final current = currentWear(entries, DateTime.now());
   if (current?.id == null) return;
   final repo = await container.read(wearLogRepositoryProvider.future);
   await repo.delete(current!.id!);
@@ -41,7 +41,8 @@ Future<void> stopWearingOutfit(BuildContext context) async {
 }
 
 /// Logs loose items as worn now. Skips (and says so) when all of them are
-/// already logged for today.
+/// already logged for today. If something is already being worn today,
+/// asks whether the pieces join it or start a new outfit.
 Future<void> logItemsWorn(
   BuildContext context, {
   required List<int> itemIds,
@@ -55,6 +56,15 @@ Future<void> logItemsWorn(
     showTopToast(context, 'Already logged today', icon: Icons.info_outline);
     return;
   }
+  final current = currentWear(entries, now);
+  if (current != null) {
+    final choice = await _askAddOrNew(context, itemIds.length);
+    if (choice == null || !context.mounted) return;
+    if (choice == _LogChoice.add) {
+      await addToTodaysWear(context, itemIds: itemIds);
+      return;
+    }
+  }
   final repo = await container.read(wearLogRepositoryProvider.future);
   await repo.log(WearEntry.now(itemIds: itemIds, now: now));
   container.invalidate(wearLogProvider);
@@ -62,4 +72,66 @@ Future<void> logItemsWorn(
   if (context.mounted) {
     showTopToast(context, '${weekdayDate(now)} · $what logged');
   }
+}
+
+/// Adds pieces to what's being worn today. Does nothing if nothing is.
+Future<void> addToTodaysWear(
+  BuildContext context, {
+  required List<int> itemIds,
+}) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+  final entries = await container.read(wearLogProvider.future);
+  final current = currentWear(entries, DateTime.now());
+  if (current?.id == null) return;
+  final added = addableItems(current!, itemIds);
+  if (added.isEmpty) return;
+  final repo = await container.read(wearLogRepositoryProvider.future);
+  await repo.addItems(current.id!, added);
+  container.invalidate(wearLogProvider);
+  if (context.mounted) {
+    final what = added.length == 1 ? 'Item' : '${added.length} items';
+    showTopToast(context, "$what added to today's outfit");
+  }
+}
+
+/// Takes a piece out of today's wear: it wasn't worn after all, so it
+/// doesn't count in stats. Removing the last piece removes the wear.
+/// Returns false if there was nothing to remove it from.
+Future<bool> removeFromTodaysWear(
+  BuildContext context, {
+  required int itemId,
+}) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+  final entries = await container.read(wearLogProvider.future);
+  final current = currentWear(entries, DateTime.now());
+  if (current?.id == null) return false;
+  final repo = await container.read(wearLogRepositoryProvider.future);
+  await repo.removeItem(current!.id!, itemId);
+  container.invalidate(wearLogProvider);
+  return true;
+}
+
+enum _LogChoice { add, separate }
+
+Future<_LogChoice?> _askAddOrNew(BuildContext context, int count) {
+  final pieces = count == 1 ? 'this piece' : 'these pieces';
+  return showDialog<_LogChoice>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Already wearing something today'),
+      content: Text("Add $pieces to today's outfit, or did you change "
+          'into a new outfit?'),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        TextButton(
+            onPressed: () => Navigator.pop(context, _LogChoice.separate),
+            child: const Text('New outfit')),
+        FilledButton(
+            onPressed: () => Navigator.pop(context, _LogChoice.add),
+            child: const Text('Add to today')),
+      ],
+    ),
+  );
 }

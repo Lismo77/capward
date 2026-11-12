@@ -14,6 +14,7 @@ import '../features/wardrobe/presentation/item_edit_screen.dart';
 import '../features/wardrobe/presentation/wardrobe_screen.dart';
 import '../features/wear_log/presentation/stats_screen.dart';
 import '../features/wear_log/presentation/today_bar.dart';
+import '../features/wear_log/presentation/today_screen.dart';
 import '../features/wear_log/presentation/wear_history_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -95,6 +96,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+      // Full screen, outside the tabs: opened from the today bar.
+      GoRoute(
+        path: '/today',
+        builder: (context, state) => const TodayScreen(),
       ),
     ],
   );
