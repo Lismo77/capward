@@ -59,17 +59,28 @@ int compareWearTime(WearEntry a, WearEntry b) {
   return byTime != 0 ? byTime : (a.id ?? 0).compareTo(b.id ?? 0);
 }
 
-/// The outfit being worn: the last outfit put on today. Wearing another
-/// outfit replaces it; loose items logged on their own don't. Null if no
-/// outfit has been logged today.
-WearEntry? currentOutfitWear(Iterable<WearEntry> entries, DateTime now) {
+/// What's being worn: the last wear logged today, from a saved outfit or
+/// from loose pieces. Wearing another outfit replaces it; pieces added
+/// during the day go into it ([addableItems]). Null if nothing is logged
+/// today.
+WearEntry? currentWear(Iterable<WearEntry> entries, DateTime now) {
   final today = dateOnly(now);
   WearEntry? latest;
   for (final e in entries) {
-    if (e.wornOn != today || e.outfitId == null) continue;
+    if (e.wornOn != today) continue;
     if (latest == null || compareWearTime(e, latest) > 0) latest = e;
   }
   return latest;
+}
+
+/// The ones of [itemIds] not already in [wear], in order and without
+/// repeats: what "add to today's outfit" would actually add.
+List<int> addableItems(WearEntry wear, Iterable<int> itemIds) {
+  final have = wear.itemIds.toSet();
+  return [
+    for (final id in itemIds)
+      if (have.add(id)) id,
+  ];
 }
 
 /// True when every one of [itemIds] is already logged on [day], so logging

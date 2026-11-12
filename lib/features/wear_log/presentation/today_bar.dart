@@ -14,8 +14,8 @@ import '../domain/wear_entry.dart';
 import 'log_wear.dart';
 
 /// Strip across the top of the main tabs: today's date and either a
-/// "Choose outfit" button or the outfit being worn. Tapping it opens the
-/// quick-choose sheet.
+/// "Choose outfit" button or what's being worn. Tapping it opens today's
+/// wear, or the quick-choose sheet when nothing is logged yet.
 class TodayBar extends ConsumerWidget {
   const TodayBar({super.key});
 
@@ -24,7 +24,7 @@ class TodayBar extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final now = DateTime.now();
-    final current = ref.watch(currentOutfitWearProvider);
+    final current = ref.watch(currentWearProvider);
     final outfits = ref.watch(outfitsProvider).valueOrNull ?? const <Outfit>[];
     final items = ref.watch(itemsProvider).valueOrNull ?? const <Item>[];
     final outfit = current == null
@@ -32,7 +32,7 @@ class TodayBar extends ConsumerWidget {
         : outfits.where((o) => o.id == current.outfitId).firstOrNull;
 
     final Widget content;
-    if (outfit == null) {
+    if (current == null) {
       content = Row(
         children: [
           Expanded(
@@ -49,7 +49,10 @@ class TodayBar extends ConsumerWidget {
       final byId = {for (final i in items) i.id!: i};
       // What was logged, which for a uniform is the day's pick.
       final pieces = orderForDisplay(
-          current!.itemIds.map((id) => byId[id]).whereType<Item>());
+          current.itemIds.map((id) => byId[id]).whereType<Item>());
+      // Worn from loose pieces: named after them, as in the history.
+      final name = outfit?.name ??
+          (pieces.isEmpty ? "Today's outfit" : defaultOutfitName(pieces));
       final since = current.wornAt == null
           ? ''
           : ' · since ${_time(context, current.wornAt!)}';
@@ -71,7 +74,7 @@ class TodayBar extends ConsumerWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(outfit.name,
+                      child: Text(name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleSmall),
@@ -98,7 +101,9 @@ class TodayBar extends ConsumerWidget {
       child: SafeArea(
         bottom: false,
         child: InkWell(
-          onTap: () => showQuickChooseSheet(context),
+          onTap: current == null
+              ? () => showQuickChooseSheet(context)
+              : () => context.push('/today'),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
             child: SizedBox(height: 44, child: content),
@@ -146,7 +151,7 @@ class _QuickChooseList extends ConsumerWidget {
     final outfits = ref.watch(outfitsProvider).valueOrNull ?? const <Outfit>[];
     final items = ref.watch(itemsProvider).valueOrNull ?? const <Item>[];
     final entries = ref.watch(wearLogProvider).valueOrNull ?? const [];
-    final current = ref.watch(currentOutfitWearProvider);
+    final current = ref.watch(currentWearProvider);
     final byId = {for (final i in items) i.id!: i};
     final sorted = sortByMostWorn(
       outfits.where((o) => o.itemIds.isNotEmpty),
@@ -209,7 +214,7 @@ class _QuickChooseList extends ConsumerWidget {
             subtitle: const Text('If you picked one by mistake'),
             onTap: () {
               Navigator.pop(context);
-              stopWearingOutfit(outerContext);
+              removeTodaysWear(outerContext);
             },
           ),
         ],

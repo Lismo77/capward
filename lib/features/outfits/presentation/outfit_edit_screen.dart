@@ -356,14 +356,14 @@ class _OutfitWearRow extends ConsumerWidget {
       ),
     );
     if (confirmed == true && context.mounted) {
-      await stopWearingOutfit(context);
+      await removeTodaysWear(context);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entries = ref.watch(wearLogProvider).valueOrNull ?? const [];
-    final current = ref.watch(currentOutfitWearProvider);
+    final current = ref.watch(currentWearProvider);
     final wearing = current?.outfitId == outfitId;
     final count = outfitWearCount(entries, outfitId);
     final itemIds = ref.watch(todaysPiecesProvider(outfitId));

@@ -132,7 +132,7 @@ void main() {
     });
   });
 
-  group('currentOutfitWear', () {
+  group('currentWear', () {
     DateTime t(int daysBack, int hour) =>
         DateTime(today.year, today.month, today.day - daysBack, hour);
     WearEntry timed(int id, DateTime at, {int? outfitId}) => WearEntry(
@@ -143,9 +143,17 @@ void main() {
       final entries = [
         timed(1, t(0, 8), outfitId: 10), // office
         timed(2, t(0, 17), outfitId: 20), // switched for the evening
-        timed(3, t(0, 19)), // loose scarf doesn't count as a change
       ];
-      expect(currentOutfitWear(entries, now)!.outfitId, 20);
+      expect(currentWear(entries, now)!.outfitId, 20);
+    });
+
+    test('a wear from loose pieces is current too (#48)', () {
+      final entries = [
+        timed(1, t(0, 8), outfitId: 10),
+        timed(2, t(0, 12)), // changed into pieces picked in the wardrobe
+      ];
+      expect(currentWear(entries, now)!.id, 2);
+      expect(currentWear([timed(1, t(0, 9))], now)!.id, 1);
     });
 
     test('switching back to an earlier outfit works', () {
@@ -154,12 +162,11 @@ void main() {
         timed(2, t(0, 12), outfitId: 20),
         timed(3, t(0, 18), outfitId: 10),
       ];
-      expect(currentOutfitWear(entries, now)!.id, 3);
+      expect(currentWear(entries, now)!.id, 3);
     });
 
     test("yesterday's outfit isn't current today", () {
-      expect(
-          currentOutfitWear([timed(1, t(1, 22), outfitId: 10)], now), isNull);
+      expect(currentWear([timed(1, t(1, 22), outfitId: 10)], now), isNull);
     });
 
     test('untimed entries (logged before v3) sort first, then by id', () {
@@ -168,8 +175,20 @@ void main() {
         WearEntry(id: 4, wornOn: today, outfitId: 40, itemIds: [1]),
         timed(1, t(0, 7), outfitId: 10),
       ];
-      expect(currentOutfitWear(entries, now)!.outfitId, 10);
-      expect(currentOutfitWear(entries.take(2), now)!.outfitId, 30);
+      expect(currentWear(entries, now)!.outfitId, 10);
+      expect(currentWear(entries.take(2), now)!.outfitId, 30);
+    });
+  });
+
+  group('addableItems', () {
+    final wear = WearEntry(id: 1, wornOn: today, itemIds: [1, 2]);
+
+    test('skips pieces already in the wear and repeats', () {
+      expect(addableItems(wear, [2, 3, 3, 4]), [3, 4]);
+    });
+
+    test('nothing to add when all are there', () {
+      expect(addableItems(wear, [1, 2]), isEmpty);
     });
   });
 
